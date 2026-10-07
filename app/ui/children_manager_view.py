@@ -2,6 +2,7 @@ from PySide6.QtWidgets import QWidget,QVBoxLayout,QHBoxLayout,QListWidget,QLineE
 from sqlalchemy import select
 from app.database import SessionLocal
 from app.models import Child
+from app.placement import age_group
 
 class ChildrenManagerView(QWidget):
     def __init__(self):
@@ -10,7 +11,7 @@ class ChildrenManagerView(QWidget):
     def refresh(self):
         self.list.clear()
         with SessionLocal() as s:
-            for c in s.scalars(select(Child).order_by(Child.id)).all(): self.list.addItem(f"{c.id} — {c.name} — {c.age} سنة")
+            for c in s.scalars(select(Child).order_by(Child.id)).all(): self.list.addItem(f"{c.id} — {c.name} — {c.age} سنة — الفئة {age_group(c.age)}")
     def add(self):
         n=self.name.text().strip()
         if not n: QMessageBox.warning(self,"تنبيه","اكتب اسم الطفل."); return
