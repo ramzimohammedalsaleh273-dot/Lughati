@@ -60,7 +60,6 @@ class ReviewItem(Base):
     repetitions: Mapped[int]=mapped_column(Integer, default=0)
     next_review: Mapped[datetime]=mapped_column(DateTime, default=datetime.utcnow)
 
-
 class Story(Base):
     __tablename__="stories"
     id: Mapped[int]=mapped_column(primary_key=True)
@@ -102,3 +101,60 @@ class DailyPlan(Base):
     language: Mapped[str]=mapped_column(String(10))
     minutes: Mapped[int]=mapped_column(Integer, default=20)
     completed: Mapped[bool]=mapped_column(Boolean, default=False)
+    tasks: Mapped[str]=mapped_column(Text, default="[]")
+
+class Activity(Base):
+    __tablename__="activities"
+    id: Mapped[int]=mapped_column(primary_key=True)
+    lesson_id: Mapped[int]=mapped_column(ForeignKey("lessons.id"))
+    kind: Mapped[str]=mapped_column(String(40))
+    instruction: Mapped[str]=mapped_column(Text)
+    content: Mapped[str]=mapped_column(Text, default="")
+    order_no: Mapped[int]=mapped_column(Integer, default=0)
+
+class MediaAsset(Base):
+    __tablename__="media_assets"
+    id: Mapped[int]=mapped_column(primary_key=True)
+    language: Mapped[str]=mapped_column(String(10))
+    level: Mapped[int]=mapped_column(Integer, default=0)
+    kind: Mapped[str]=mapped_column(String(30))
+    title: Mapped[str]=mapped_column(String(200))
+    path: Mapped[str]=mapped_column(String(1000), default="")
+    source: Mapped[str]=mapped_column(String(500), default="")
+    offline_ready: Mapped[bool]=mapped_column(Boolean, default=False)
+
+class AssessmentAttempt(Base):
+    __tablename__="assessment_attempts"
+    id: Mapped[int]=mapped_column(primary_key=True)
+    child_id: Mapped[int]=mapped_column(ForeignKey("children.id"))
+    language: Mapped[str]=mapped_column(String(10))
+    level: Mapped[int]=mapped_column(Integer, default=0)
+    total: Mapped[int]=mapped_column(Integer, default=0)
+    correct: Mapped[int]=mapped_column(Integer, default=0)
+    score: Mapped[float]=mapped_column(Float, default=0)
+    started_at: Mapped[datetime]=mapped_column(DateTime, default=datetime.utcnow)
+    finished_at: Mapped[datetime|None]=mapped_column(DateTime, nullable=True)
+
+class Recording(Base):
+    __tablename__="recordings"
+    id: Mapped[int]=mapped_column(primary_key=True)
+    child_id: Mapped[int]=mapped_column(ForeignKey("children.id"))
+    language: Mapped[str]=mapped_column(String(10))
+    prompt: Mapped[str]=mapped_column(Text, default="")
+    path: Mapped[str]=mapped_column(String(1000))
+    duration: Mapped[float]=mapped_column(Float, default=0)
+    self_score: Mapped[int]=mapped_column(Integer, default=0)
+    created_at: Mapped[datetime]=mapped_column(DateTime, default=datetime.utcnow)
+
+class ParentProfile(Base):
+    __tablename__="parent_profiles"
+    id: Mapped[int]=mapped_column(primary_key=True)
+    name: Mapped[str]=mapped_column(String(120), default="ولي الأمر")
+    pin_hash: Mapped[str]=mapped_column(String(255), default="")
+    created_at: Mapped[datetime]=mapped_column(DateTime, default=datetime.utcnow)
+
+class UserSetting(Base):
+    __tablename__="user_settings"
+    id: Mapped[int]=mapped_column(primary_key=True)
+    key: Mapped[str]=mapped_column(String(150), unique=True)
+    value: Mapped[str]=mapped_column(Text, default="")
