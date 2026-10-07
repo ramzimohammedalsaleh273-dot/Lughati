@@ -9,7 +9,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -r requirements.txt
-      - run: sudo apt-get update && sudo apt-get install -y libegl1
+      - run: sudo apt-get update && sudo apt-get install -y libegl1 libpulse0
       - run: python -m pytest -q
         env:
           PYTHONPATH: .
