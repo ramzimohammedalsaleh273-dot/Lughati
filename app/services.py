@@ -33,6 +33,10 @@ def save_lesson(child_id,lesson_id,score):
         p=s.scalar(select(Progress).where(Progress.child_id==child_id,Progress.lesson_id==lesson_id))
         if not p:p=Progress(child_id=child_id,lesson_id=lesson_id);s.add(p)
         p.score=max(p.score,score);p.mastered=p.score>=80;p.updated_at=datetime.utcnow();s.commit()
+    from app.learning_engine import ensure_review_items
+    with SessionLocal() as s:
+        lesson=s.get(Lesson,lesson_id)
+        if lesson: ensure_review_items(child_id,lesson.language,lesson.level)
     from app.sync import queue
     queue("progress",lesson_id,"upsert",{"child_id":child_id,"lesson_id":lesson_id,"score":score})
     auto_award(child_id)
