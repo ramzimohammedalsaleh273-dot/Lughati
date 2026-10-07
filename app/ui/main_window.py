@@ -21,11 +21,13 @@ from app.ui.dashboard_view import DashboardView
 from app.ui.question_bank_view import QuestionBankView
 from app.ui.media_player_view import MediaPlayerView
 from app.ui.children_manager_view import ChildrenManagerView
+from app.ui.curriculum_view import CurriculumView
+from app.ui.stories_library_view import StoriesLibraryView
 class MainWindow(QMainWindow):
  def __init__(self):
   super().__init__(); self.setWindowTitle("لغتي — مدرسة اللغات"); self.setLayoutDirection(Qt.RightToLeft); root=QWidget(); self.setCentralWidget(root); outer=QHBoxLayout(root); nav=QListWidget(); nav.setFixedWidth(220)
-  nav.addItems(["الرئيسية","خطة اليوم","العربية","English","الكلمات","قاموس وبحث","المراجعة الذكية","الألعاب","القصص","التحدث والنطق","بنك الأسئلة","الاختبارات","تحديد المستوى","التقدم","المهارات","ملف الطفل","الأطفال","ولي الأمر","الوسائط","مشغل الوسائط","الإعدادات"]); self.stack=QStackedWidget(); outer.addWidget(nav); outer.addWidget(self.stack)
-  widgets=[DashboardView(),PlanView(),LessonView("ar"),LessonView("en"),WordsView(),DictionaryView(),ReviewView(),GamesView(),StoryView(),SpeakingView(),QuestionBankView(),TestView(),AssessmentView(),ProgressView(),SkillsView(),ChildView(),ChildrenManagerView(),ParentView(),MediaView(),MediaPlayerView(),SettingsView()]
+  nav.addItems(["الرئيسية","خطة اليوم","العربية","English","المنهج","الكلمات","قاموس وبحث","المراجعة الذكية","الألعاب","القصص","مكتبة القصص","التحدث والنطق","بنك الأسئلة","الاختبارات","تحديد المستوى","التقدم","المهارات","ملف الطفل","الأطفال","ولي الأمر","الوسائط","مشغل الوسائط","الإعدادات"]); self.stack=QStackedWidget(); outer.addWidget(nav); outer.addWidget(self.stack)
+  widgets=[DashboardView(),PlanView(),LessonView("ar"),LessonView("en"),CurriculumView(),WordsView(),DictionaryView(),ReviewView(),GamesView(),StoryView(),StoriesLibraryView(),SpeakingView(),QuestionBankView(),TestView(),AssessmentView(),ProgressView(),SkillsView(),ChildView(),ChildrenManagerView(),ParentView(),MediaView(),MediaPlayerView(),SettingsView()]
   for w in widgets:self.stack.addWidget(w)
   nav.currentRowChanged.connect(self.stack.setCurrentIndex); nav.setCurrentRow(0)
  def home(self):
