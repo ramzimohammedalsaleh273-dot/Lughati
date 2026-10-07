@@ -25,11 +25,12 @@ from app.ui.curriculum_view import CurriculumView
 from app.ui.stories_library_view import StoriesLibraryView
 from app.ui.daily_plan_view import DailyPlanView
 from app.ui.achievements_view import AchievementsView
+from app.ui.level_map_view import LevelMapView
 class MainWindow(QMainWindow):
  def __init__(self):
   super().__init__(); self.setWindowTitle("لغتي — مدرسة اللغات"); self.setLayoutDirection(Qt.RightToLeft); root=QWidget(); self.setCentralWidget(root); outer=QHBoxLayout(root); nav=QListWidget(); nav.setFixedWidth(220)
-  nav.addItems(["الرئيسية","خطة اليوم","الخطة الذكية","العربية","English","المنهج","الكلمات","قاموس وبحث","المراجعة الذكية","الألعاب","القصص","مكتبة القصص","التحدث والنطق","بنك الأسئلة","الاختبارات","تحديد المستوى","التقدم","المهارات","الإنجازات","ملف الطفل","الأطفال","ولي الأمر","الوسائط","مشغل الوسائط","الإعدادات"]); self.stack=QStackedWidget(); outer.addWidget(nav); outer.addWidget(self.stack)
-  widgets=[DashboardView(),PlanView(),DailyPlanView(),LessonView("ar"),LessonView("en"),CurriculumView(),WordsView(),DictionaryView(),ReviewView(),GamesView(),StoryView(),StoriesLibraryView(),SpeakingView(),QuestionBankView(),TestView(),AssessmentView(),ProgressView(),SkillsView(),AchievementsView(),ChildView(),ChildrenManagerView(),ParentView(),MediaView(),MediaPlayerView(),SettingsView()]
+  nav.addItems(["الرئيسية","خطة اليوم","الخطة الذكية","العربية","English","المنهج","الكلمات","قاموس وبحث","المراجعة الذكية","الألعاب","القصص","مكتبة القصص","التحدث والنطق","بنك الأسئلة","الاختبارات","تحديد المستوى","التقدم","خريطة المستويات","المهارات","الإنجازات","ملف الطفل","الأطفال","ولي الأمر","الوسائط","مشغل الوسائط","الإعدادات"]); self.stack=QStackedWidget(); outer.addWidget(nav); outer.addWidget(self.stack)
+  widgets=[DashboardView(),PlanView(),DailyPlanView(),LessonView("ar"),LessonView("en"),CurriculumView(),WordsView(),DictionaryView(),ReviewView(),GamesView(),StoryView(),StoriesLibraryView(),SpeakingView(),QuestionBankView(),TestView(),AssessmentView(),ProgressView(),LevelMapView(),SkillsView(),AchievementsView(),ChildView(),ChildrenManagerView(),ParentView(),MediaView(),MediaPlayerView(),SettingsView()]
   for w in widgets:self.stack.addWidget(w)
   nav.currentRowChanged.connect(self.stack.setCurrentIndex); nav.setCurrentRow(0)
  def home(self):
