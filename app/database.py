@@ -13,5 +13,6 @@ class Base(DeclarativeBase):
     pass
 
 def init_db():
-    from app.models import Child, Lesson, Word, Progress, TestResult, ReviewItem
-    Base.metadata.create_all(engine)
+    import app.models  # register every mapped table
+    from app.migrations import ensure_schema
+    ensure_schema()
