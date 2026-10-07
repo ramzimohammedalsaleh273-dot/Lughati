@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from sqlalchemy import select
 from app.database import SessionLocal
-from app.models import Child, Lesson, Word, Progress, TestResult, ReviewItem, Story, Question
+from app.models import Child, Lesson, Word, Progress, TestResult, ReviewItem, Story, Question, DailyPlan
 
 def get_child():
     with SessionLocal() as s: return s.scalar(select(Child).order_by(Child.id))
@@ -49,3 +49,12 @@ def search_words(language, query_text):
     with SessionLocal() as s:
         stmt=select(Word).where(Word.language==language).where(Word.text.contains(q) | Word.meaning.contains(q)).order_by(Word.level,Word.id)
         return list(s.scalars(stmt).all())
+
+
+def create_daily_plan(child_id,language="ar",minutes=20):
+    today=datetime.now().date().isoformat()
+    with SessionLocal() as s:
+        p=s.scalar(select(DailyPlan).where(DailyPlan.child_id==child_id,DailyPlan.date==today,DailyPlan.language==language))
+        if not p:
+            p=DailyPlan(child_id=child_id,date=today,language=language,minutes=minutes); s.add(p); s.commit()
+        return p
