@@ -39,3 +39,15 @@ class UserSetting(Base):
     __tablename__="user_settings"; id:Mapped[int]=mapped_column(primary_key=True); key:Mapped[str]=mapped_column(String(150),unique=True); value:Mapped[str]=mapped_column(Text,default="")
 class SyncEvent(Base):
     __tablename__="sync_events"; id:Mapped[int]=mapped_column(primary_key=True); entity:Mapped[str]=mapped_column(String(80)); entity_id:Mapped[int]=mapped_column(Integer); operation:Mapped[str]=mapped_column(String(20)); payload:Mapped[str]=mapped_column(Text,default="{}"); status:Mapped[str]=mapped_column(String(20),default="pending"); created_at:Mapped[datetime]=mapped_column(DateTime,default=datetime.utcnow); synced_at:Mapped[datetime|None]=mapped_column(DateTime,nullable=True)
+
+class CurriculumUnit(Base):
+    __tablename__="curriculum_units"
+    id:Mapped[int]=mapped_column(primary_key=True)
+    language:Mapped[str]=mapped_column(String(10))
+    age_group:Mapped[str]=mapped_column(String(20))
+    level:Mapped[int]=mapped_column(Integer)
+    skill:Mapped[str]=mapped_column(String(50))
+    kind:Mapped[str]=mapped_column(String(30),default="lesson")
+    title:Mapped[str]=mapped_column(String(250))
+    body:Mapped[str]=mapped_column(Text,default="")
+    payload:Mapped[str]=mapped_column(Text,default="{}")
