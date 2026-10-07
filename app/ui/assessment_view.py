@@ -1,5 +1,6 @@
 from PySide6.QtWidgets import QWidget,QVBoxLayout,QLabel,QPushButton,QRadioButton,QButtonGroup
 from app.services import get_child,save_test
+from app.placement import recommended_level
 class AssessmentView(QWidget):
     def __init__(self):
         super().__init__(); self.questions=[("أي مهارة تعني فهم الكلام المسموع؟",["الاستماع","الكتابة","الرسم"],0),("أي كلمة تعني كتابًا؟",["book","water","sun"],0),("ما أول خطوة مناسبة للمبتدئ؟",["تعلم الأصوات والحروف","قراءة نص طويل","دراسة النحو المتقدم"],0)]; self.i=0; self.score=0; l=QVBoxLayout(self); l.addWidget(QLabel("تقييم تحديد المستوى")); self.q=QLabel(); l.addWidget(self.q); self.g=QButtonGroup(self); self.r=[]
@@ -14,4 +15,4 @@ class AssessmentView(QWidget):
         self.score+=self.g.checkedId()==self.questions[self.i][2]; self.i+=1
         if self.i<len(self.questions): self.showq()
         else:
-            pct=self.score/len(self.questions)*100; save_test(get_child().id,"mixed","placement",pct); self.q.setText("اكتمل التقييم"); self.out.setText(f"نتيجتك: {pct:.0f}% — ستُستخدم كبداية أولية لخطة التعلم."); self.b.setEnabled(False)
+            pct=self.score/len(self.questions)*100; save_test(get_child().id,"mixed","placement",pct); self.q.setText("اكتمل التقييم"); self.out.setText(f"نتيجتك: {pct:.0f}% — المستوى المقترح للبدء: {recommended_level(pct)}"); self.b.setEnabled(False)
