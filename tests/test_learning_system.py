@@ -5,11 +5,11 @@ from app.placement import recommended_level,age_group
 
 def test_curriculum_and_content():
     init_db(); seed_content()
-    assert len(lessons('ar'))>=13
-    assert len(lessons('en'))>=13
-    assert stories('ar'); assert stories('en')
-    assert questions('ar'); assert questions('en')
-    assert len(words('ar'))>=20 and len(words('en'))>=20
+    assert len(lessons('ar'))>=39
+    assert len(lessons('en'))>=39
+    assert len(stories('ar'))>=13; assert len(stories('en'))>=13
+    assert len(questions('ar'))>=39; assert len(questions('en'))>=39
+    assert len(words('ar'))>=50 and len(words('en'))>=50
 
 def test_placement():
     assert recommended_level(35)==0
