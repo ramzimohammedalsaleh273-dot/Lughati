@@ -1,18 +1,24 @@
 from pathlib import Path
-from sqlalchemy import create_engine
-from sqlalchemy.orm import DeclarativeBase, sessionmaker
+from sqlalchemy import create_engine, event, text
+from sqlalchemy.orm import declarative_base, sessionmaker
 
-ROOT = Path(__file__).resolve().parents[1]
-DATA = ROOT / "data"
-DATA.mkdir(exist_ok=True)
-DB_PATH = DATA / "lughati.db"
-engine = create_engine(f"sqlite:///{DB_PATH}", future=True)
-SessionLocal = sessionmaker(bind=engine, expire_on_commit=False)
-
-class Base(DeclarativeBase):
-    pass
+ROOT=Path(__file__).resolve().parent.parent
+DATA_DIR=ROOT/"data"
+DATA_DIR.mkdir(parents=True,exist_ok=True)
+DB_PATH=DATA_DIR/"lughati.db"
+engine=create_engine(f"sqlite:///{DB_PATH}",future=True)
+@event.listens_for(engine,"connect")
+def _sqlite_pragmas(dbapi_connection, connection_record):
+    cursor=dbapi_connection.cursor()
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.execute("PRAGMA journal_mode=WAL")
+    cursor.execute("PRAGMA synchronous=NORMAL")
+    cursor.close()
+SessionLocal=sessionmaker(bind=engine,autoflush=False,autocommit=False)
+Base=declarative_base()
 
 def init_db():
-    import app.models  # register every mapped table
+    from app.models import Base as ModelBase
+    ModelBase.metadata.create_all(engine)
     from app.migrations import ensure_schema
     ensure_schema()
