@@ -96,10 +96,16 @@ def award(child_id,code):
 def auto_award(child_id):
     with SessionLocal() as s:
         lesson_count=s.scalar(select(func.count()).select_from(Progress).where(Progress.child_id==child_id)) or 0
+        mastered_count=s.scalar(select(func.count()).select_from(Progress).where(Progress.child_id==child_id,Progress.mastered.is_(True))) or 0
         test_count=s.scalar(select(func.count()).select_from(TestResult).where(TestResult.child_id==child_id)) or 0
         word_count=s.scalar(select(func.count()).select_from(ReviewItem).where(ReviewItem.child_id==child_id)) or 0
+        plan_count=s.scalar(select(func.count()).select_from(DailyPlan).where(DailyPlan.child_id==child_id,DailyPlan.completed.is_(True))) or 0
         earned=[]
-        if lesson_count>=1:earned.append("first_lesson")
-        if word_count>=5:earned.append("five_words")
-        if test_count>=1:earned.append("first_test")
-    for code in earned:award(child_id,code)
+        if lesson_count>=1: earned.append("first_lesson")
+        if word_count>=5: earned.append("five_words")
+        if test_count>=1: earned.append("first_test")
+        if lesson_count>=5: earned.append("five_lessons")
+        if lesson_count>=10: earned.append("ten_lessons")
+        if plan_count>=1: earned.append("daily_streak")
+        if mastered_count>=1: earned.append("master_level")
+    for code in earned: award(child_id,code)
