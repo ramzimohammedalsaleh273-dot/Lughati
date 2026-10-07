@@ -30,15 +30,18 @@ from app.ui.level_map_view import LevelMapView
 from app.ui.help_view import HelpView
 from app.ui.practice_view import PracticeView
 from app.ui.listening_view import ListeningView
+from app.ui.mastery_view import MasteryView
+from app.ui.recordings_view import RecordingsView
+from app.ui.rich_assessment_view import RichAssessmentView
 
 class MainWindow(QMainWindow):
  def __init__(self):
   super().__init__(); self.setWindowTitle("لغتي — مدرسة اللغات"); self.setLayoutDirection(Qt.RightToLeft)
   root=QWidget(); self.setCentralWidget(root); outer=QHBoxLayout(root)
   side=QVBoxLayout(); self.child_box=QComboBox(); side.addWidget(QLabel("الطفل الحالي")); side.addWidget(self.child_box)
-  nav=QListWidget(); nav.setFixedWidth(220); nav.addItems(["الرئيسية","خطة اليوم","الخطة الذكية","العربية","English","المنهج","الكلمات","قاموس وبحث","المراجعة الذكية","الألعاب","القصص","مكتبة القصص","التحدث والنطق","الاستماع","بنك الأسئلة","الاختبارات","تحديد المستوى","التقدم","خريطة المستويات","المهارات","الإنجازات","ملف الطفل","الأطفال","ولي الأمر","الوسائط","مشغل الوسائط","تدريب الكتابة","المساعد","الإعدادات"]); side.addWidget(nav,1)
+  nav=QListWidget(); nav.addItems(["الرئيسية","خطة اليوم","الخطة الذكية","العربية","English","المنهج","الكلمات","قاموس وبحث","المراجعة الذكية","الألعاب","القصص","مكتبة القصص","التحدث والنطق","التسجيلات","الاستماع","بنك الأسئلة","الاختبارات","التقييم الشامل","تحديد المستوى","التقدم","خريطة المستويات","خريطة الإتقان","المهارات","الإنجازات","ملف الطفل","الأطفال","ولي الأمر","الوسائط","مشغل الوسائط","تدريب الكتابة","المساعد","الإعدادات"]); side.addWidget(nav,1)
   self.stack=QStackedWidget(); outer.addLayout(side); outer.addWidget(self.stack,1)
-  self.widgets=[DashboardView(),PlanView(),DailyPlanView(),LessonView("ar"),LessonView("en"),CurriculumView(),WordsView(),DictionaryView(),ReviewView(),GamesView(),StoryView(),StoriesLibraryView(),SpeakingView(),ListeningView(),QuestionBankView(),TestView(),AssessmentView(),ProgressView(),LevelMapView(),SkillsView(),AchievementsView(),ChildView(),ChildrenManagerView(),ParentView(),MediaView(),MediaPlayerView(),PracticeView(),HelpView(),SettingsView()]
+  self.widgets=[DashboardView(),PlanView(),DailyPlanView(),LessonView("ar"),LessonView("en"),CurriculumView(),WordsView(),DictionaryView(),ReviewView(),GamesView(),StoryView(),StoriesLibraryView(),SpeakingView(),RecordingsView(),ListeningView(),QuestionBankView(),TestView(),RichAssessmentView(),AssessmentView(),ProgressView(),LevelMapView(),MasteryView(),SkillsView(),AchievementsView(),ChildView(),ChildrenManagerView(),ParentView(),MediaView(),MediaPlayerView(),PracticeView(),HelpView(),SettingsView()]
   for w in self.widgets:self.stack.addWidget(w)
   nav.currentRowChanged.connect(self.stack.setCurrentIndex); nav.setCurrentRow(0)
   self.child_box.currentIndexChanged.connect(self._select_child)
@@ -46,7 +49,7 @@ class MainWindow(QMainWindow):
  def refresh_child_state(self):
   current=get_child(); self.child_box.blockSignals(True); self.child_box.clear()
   data=children()
-  for c in data: self.child_box.addItem(f"{c.name} — {c.age} سنة",c.id)
+  for c in data:self.child_box.addItem(f"{c.name} — {c.age} سنة",c.id)
   if current:
    idx=self.child_box.findData(current.id)
    if idx>=0:self.child_box.setCurrentIndex(idx)
@@ -62,5 +65,5 @@ class MainWindow(QMainWindow):
   try:
    from app.state import unsubscribe
    unsubscribe(self.refresh_child_state)
-  except Exception: pass
+  except Exception:pass
   super().closeEvent(event)
