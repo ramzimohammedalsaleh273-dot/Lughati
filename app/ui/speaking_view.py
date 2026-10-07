@@ -6,6 +6,7 @@ from app.services import get_child
 from app.recording import register_recording
 
 class SpeakingView(QWidget):
+    """مختبر التحدث: استيراد الوسائط المتعددة لا يحدث إلا عند فتح المختبر."""
     def __init__(self):
         from PySide6.QtMultimedia import QAudioInput,QMediaCaptureSession,QMediaRecorder,QMediaPlayer,QAudioOutput
         super().__init__(); self.setLayout(QVBoxLayout()); l=self.layout()
