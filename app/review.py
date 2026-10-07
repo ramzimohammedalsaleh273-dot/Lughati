@@ -1,10 +1,9 @@
 from datetime import datetime,timedelta
 from sqlalchemy import select
 from app.database import SessionLocal
-from app.models import ReviewItem
+from app.models import ReviewItem,Word
 
 def schedule(child_id,word_id,quality):
-    """تحديث تكرار متباعد بسيط ومستقر: جودة 0–5 مع معامل سهولة وفواصل متصاعدة."""
     quality=max(0,min(5,int(quality)))
     with SessionLocal() as s:
         item=s.scalar(select(ReviewItem).where(ReviewItem.child_id==child_id,ReviewItem.word_id==word_id))
@@ -18,7 +17,7 @@ def schedule(child_id,word_id,quality):
             item.state="error"
         else:
             item.repetitions+=1
-            item.ease=max(1.3,float(item.ease)+(0.1-(5-quality)*(0.08)))
+            item.ease=max(1.3,float(item.ease)+(0.1-(5-quality)*0.08))
             if item.repetitions==1: days=1
             elif item.repetitions==2: days=3
             elif item.repetitions==3: days=7
@@ -30,18 +29,16 @@ def schedule(child_id,word_id,quality):
 
 def due(child_id,limit=50):
     with SessionLocal() as s:
-        return list(s.scalars(
-            select(ReviewItem)
+        return list(s.execute(
+            select(ReviewItem,Word).join(Word,Word.id==ReviewItem.word_id)
             .where(ReviewItem.child_id==child_id,ReviewItem.next_review<=datetime.utcnow())
             .order_by(ReviewItem.next_review)
             .limit(max(1,int(limit)))
-        ))
+        ).all())
 
 def upcoming(child_id,limit=50):
     with SessionLocal() as s:
         return list(s.scalars(
-            select(ReviewItem)
-            .where(ReviewItem.child_id==child_id)
-            .order_by(ReviewItem.next_review)
-            .limit(max(1,int(limit)))
+            select(ReviewItem).where(ReviewItem.child_id==child_id)
+            .order_by(ReviewItem.next_review).limit(max(1,int(limit)))
         ))
