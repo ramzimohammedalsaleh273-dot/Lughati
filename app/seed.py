@@ -1,7 +1,7 @@
 import json
 from app.database import SessionLocal
 from app.models import Child, Lesson, Word, Story, Question, Achievement, Activity, MediaAsset, ParentProfile, UserSetting
-from app.first_half_content import build_rich_content
+from app.content_authoring import build_content
 
 def _lesson(s, data):
     row=s.query(Lesson).filter_by(language=data["language"],level=data["level"],title=data["title"]).first()
@@ -24,7 +24,7 @@ def _question(s, data):
         s.add(Question(language=data["language"],level=data["level"],skill=data["skill"],prompt=data["prompt"],options=json.dumps(options,ensure_ascii=False),answer=data["answer"]))
 
 def seed_content():
-    lessons,words,stories,questions=build_rich_content()
+    lessons,words,stories,questions=build_content()
     with SessionLocal() as s:
         child=s.query(Child).first()
         if not child:
@@ -37,11 +37,13 @@ def seed_content():
                 s.add(UserSetting(key=key,value=value))
         for data in lessons:
             row=_lesson(s,data)
-            kinds=[
-                ("تهيئة", "اقرأ هدف النشاط وافهم المطلوب قبل البدء."),
-                ("تطبيق", "نفذ النشاط وحدك ثم قارن النتيجة بالنموذج."),
-                ("مراجعة", "أعد النشاط مع مثال جديد حتى تثبت المهارة.")
-            ]
+            kinds=[(a["kind"],a["instruction"]) for a in data.get("activities",[])]
+            if not kinds:
+                kinds=[
+                    ("تهيئة", "اقرأ هدف النشاط وافهم المطلوب قبل البدء."),
+                    ("تطبيق", "نفذ النشاط وحدك ثم قارن النتيجة بالنموذج."),
+                    ("مراجعة", "أعد النشاط مع مثال جديد حتى تثبت المهارة.")
+                ]
             for order,(kind,instruction) in enumerate(kinds,1):
                 exists=s.query(Activity).filter_by(lesson_id=row.id,order_no=order).first()
                 if not exists:
