@@ -2,6 +2,7 @@ import json
 from app.database import SessionLocal
 from app.models import Child, Lesson, Word, Story, Question, Achievement, Activity, MediaAsset, ParentProfile, UserSetting
 from app.content_authoring import build_content
+from app.vocabulary_pack import AR_EXTRA, EN_EXTRA
 
 def _lesson(s, data):
     row=s.query(Lesson).filter_by(language=data["language"],level=data["level"],title=data["title"]).first()
@@ -49,6 +50,11 @@ def seed_content():
                 if not exists:
                     s.add(Activity(lesson_id=row.id,kind=kind,instruction=instruction,content=data["body"],order_no=order))
         for data in words: _word(s,data)
+        for lang,extra in (("ar",AR_EXTRA),("en",EN_EXTRA)):
+            for level in range(13):
+                for idx,(term,meaning,example) in enumerate(extra):
+                    if idx % 2 == level % 2:
+                        _word(s,{"language":lang,"text":term,"meaning":meaning,"example":example,"level":level})
         for data in stories: _story(s,data)
         for data in questions: _question(s,data)
         for lang in ("ar","en"):
