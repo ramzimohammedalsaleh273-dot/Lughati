@@ -32,4 +32,5 @@ def activity_summary(child_id, days=30):
         }
 
 def skill_report(child_id, language):
-    return {k:round(float(v),1) for k,v in child_summary(child_id,language)["languages"][language]["skills"].items()}
+    rows=child_summary(child_id,language)["languages"][language]["skills"]
+    return {row.skill:round(float(row.score),1) for row in rows}
