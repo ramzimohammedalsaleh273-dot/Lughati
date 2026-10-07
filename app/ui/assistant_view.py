@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QWidget,QVBoxLayout,QLineEdit,QPushButton,QTextEdit,QComboBox
-from app.assistant import answer
+from app.ai_assistant import answer
 
 class AssistantView(QWidget):
     def __init__(self):
