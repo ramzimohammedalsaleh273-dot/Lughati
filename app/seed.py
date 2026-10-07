@@ -1,19 +1,52 @@
+import json
 from app.database import SessionLocal
-from app.models import Child, Lesson, Word
+from app.models import Child, Lesson, Word, Story, Question, Achievement, DailyPlan
+from app.curriculum import ARABIC_LEVELS, ENGLISH_LEVELS
+from app.content import AR_WORDS, EN_WORDS
 
 def seed_content():
     with SessionLocal() as s:
-        if not s.query(Child).first(): s.add(Child(name="الطفل", age=6))
-        if s.query(Lesson).count() == 0:
-            lessons=[]
-            arabic=[("الحروف العربية","تعلم شكل وصوت الحرف"),("الحركات","الفتحة والضمة والكسرة"),("المقاطع","دمج الأصوات في مقاطع"),("الكلمات الأولى","قراءة كلمات بسيطة"),("الجملة","بناء جملة عربية قصيرة")]
-            english=[("English Alphabet","Learn letters and sounds"),("Phonics","Connect sounds to letters"),("CVC Words","Read simple words"),("First Sentences","Build short sentences"),("Listening","Understand simple speech")]
-            for level,(title,body) in enumerate(arabic): lessons.append(Lesson(language="ar",level=level,title=title,skill="reading",body=body))
-            for level,(title,body) in enumerate(english): lessons.append(Lesson(language="en",level=level,title=title,skill="reading",body=body))
-            s.add_all(lessons)
-        if s.query(Word).count() == 0:
-            ar=[("أب","father","هذا أبي."),("أم","mother","هذه أمي."),("بيت","house","هذا بيت."),("كتاب","book","هذا كتاب."),("قلم","pen","هذا قلم."),("ماء","water","أشرب الماء.")]
-            en=[("cat","قطة","The cat is here."),("dog","كلب","The dog is big."),("book","كتاب","This is a book."),("pen","قلم","This is a pen."),("water","ماء","I drink water."),("sun","شمس","The sun is bright.")]
-            s.add_all([Word(language="ar",text=a,meaning=b,example=c,level=0) for a,b,c in ar])
-            s.add_all([Word(language="en",text=a,meaning=b,example=c,level=0) for a,b,c in en])
+        if not s.query(Child).first():
+            s.add(Child(name="الطفل", age=6)); s.flush()
+        if s.query(Lesson).count() < 26:
+            for level in range(13):
+                at=ARABIC_LEVELS[level]
+                et=ENGLISH_LEVELS[level]
+                for title,skill,body in [
+                    (at,"reading",f"الوحدة العربية {level}: {at}"),
+                    (et,"reading",f"English level {level}: {et}"),
+                ]:
+                    lang="ar" if title==at else "en"
+                    if not s.query(Lesson).filter_by(language=lang,level=level,title=title).first():
+                        s.add(Lesson(language=lang,level=level,title=title,skill=skill,body=body))
+        if s.query(Word).count() < len(AR_WORDS)+len(EN_WORDS):
+            for level,(text,meaning,example) in enumerate(AR_WORDS):
+                if not s.query(Word).filter_by(language="ar",text=text).first():
+                    s.add(Word(language="ar",text=text,meaning=meaning,example=example,level=min(level,12)))
+            for level,(text,meaning,example) in enumerate(EN_WORDS):
+                if not s.query(Word).filter_by(language="en",text=text).first():
+                    s.add(Word(language="en",text=text,meaning=meaning,example=example,level=min(level,12)))
+        stories=[
+          ("ar",0,"حكاية الحرف","كان حرف الألف يبحث عن أصدقائه. قابل باء وتاء، وتعلموا أن القراءة تبدأ من معرفة الحروف."),
+          ("ar",4,"يوم في المدرسة","ذهب سامي إلى المدرسة، رتب كتبه وقرأ قصة قصيرة ثم كتب جملة جميلة."),
+          ("en",0,"A Little Cat","A little cat sees the sun. The cat runs and plays."),
+          ("en",4,"At School","Maya goes to school. She reads a book and writes a sentence.")
+        ]
+        for lang,level,title,body in stories:
+            if not s.query(Story).filter_by(language=lang,title=title).first():
+                s.add(Story(language=lang,level=level,title=title,body=body,questions=json.dumps([],ensure_ascii=False)))
+        qs=[
+          ("ar",0,"reading","ما أول حرف في كلمة «أب»؟",json.dumps(["أ","ب","ت"],ensure_ascii=False),"أ"),
+          ("ar",2,"grammar","اختر الحركة في «بُ»",json.dumps(["الفتحة","الضمة","الكسرة"],ensure_ascii=False),"الضمة"),
+          ("ar",4,"reading","أي جملة صحيحة؟",json.dumps(["هذا كتاب.","هذا كتب.","هذا كتابان."],ensure_ascii=False),"هذا كتاب."),
+          ("en",0,"vocabulary","What is «cat»?",json.dumps(["قطة","كلب","كتاب"],ensure_ascii=False),"قطة"),
+          ("en",2,"reading","Which word is CVC?",json.dumps(["cat","school","beautiful"],ensure_ascii=False),"cat"),
+          ("en",4,"grammar","Choose: I ___ a book.",json.dumps(["have","has","having"],ensure_ascii=False),"have")
+        ]
+        for lang,level,skill,prompt,options,answer in qs:
+            if not s.query(Question).filter_by(language=lang,prompt=prompt).first():
+                s.add(Question(language=lang,level=level,skill=skill,prompt=prompt,options=options,answer=answer))
+        ach=[("first_lesson","أول درس","أكمل أول درس"),("five_words","خمس كلمات","تعلم خمس كلمات"),("first_test","أول اختبار","أكمل أول اختبار"),("story_reader","قارئ القصص","اقرأ قصة")]
+        for code,title,desc in ach:
+            if not s.query(Achievement).filter_by(code=code).first(): s.add(Achievement(code=code,title=title,description=desc))
         s.commit()
