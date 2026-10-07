@@ -37,11 +37,11 @@ def save_lesson(child_id, lesson_id, score):
     with SessionLocal() as s:
         p=s.scalar(select(Progress).where(Progress.child_id==child_id,Progress.lesson_id==lesson_id))
         if not p: p=Progress(child_id=child_id,lesson_id=lesson_id); s.add(p)
-        p.score=max(p.score,score); p.mastered=p.score>=80; p.updated_at=datetime.utcnow(); s.commit()
+        p.score=max(p.score,score); p.mastered=p.score>=80; p.updated_at=datetime.utcnow(); s.commit()\n    auto_award(child_id)
 
 def save_test(child_id,language,skill,score):
     with SessionLocal() as s:
-        s.add(TestResult(child_id=child_id,language=language,skill=skill,score=score)); s.commit()
+        s.add(TestResult(child_id=child_id,language=language,skill=skill,score=score)); s.commit()\n    auto_award(child_id)
 
 def dashboard(child_id):
     with SessionLocal() as s:
