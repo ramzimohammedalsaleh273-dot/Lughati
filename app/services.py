@@ -6,11 +6,20 @@ from app.models import Child, Lesson, Word, Progress, TestResult, ReviewItem, St
 def get_child():
     with SessionLocal() as s: return s.scalar(select(Child).order_by(Child.id))
 
-def lessons(language):
-    with SessionLocal() as s: return list(s.scalars(select(Lesson).where(Lesson.language==language).order_by(Lesson.level)))
+def lessons(language=None, level=None):
+    with SessionLocal() as s:
+        q=select(Lesson).order_by(Lesson.level,Lesson.id)
+        if language: q=q.where(Lesson.language==language)
+        if level is not None: q=q.where(Lesson.level==level)
+        return list(s.scalars(q).all())
 
-def words(language):
-    with SessionLocal() as s: return list(s.scalars(select(Word).where(Word.language==language).order_by(Word.id)))
+def words(language=None, level=None, query=None):
+    with SessionLocal() as s:
+        q=select(Word).order_by(Word.level,Word.id)
+        if language: q=q.where(Word.language==language)
+        if level is not None: q=q.where(Word.level==level)
+        if query: q=q.where(Word.text.contains(query) | Word.meaning.contains(query))
+        return list(s.scalars(q).all())
 
 def save_lesson(child_id, lesson_id, score):
     with SessionLocal() as s:
