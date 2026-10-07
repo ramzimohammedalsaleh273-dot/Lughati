@@ -59,3 +59,46 @@ class ReviewItem(Base):
     ease: Mapped[float]=mapped_column(Float, default=2.5)
     repetitions: Mapped[int]=mapped_column(Integer, default=0)
     next_review: Mapped[datetime]=mapped_column(DateTime, default=datetime.utcnow)
+
+
+class Story(Base):
+    __tablename__="stories"
+    id: Mapped[int]=mapped_column(primary_key=True)
+    language: Mapped[str]=mapped_column(String(10))
+    level: Mapped[int]=mapped_column(Integer, default=0)
+    title: Mapped[str]=mapped_column(String(200))
+    body: Mapped[str]=mapped_column(Text, default="")
+    questions: Mapped[str]=mapped_column(Text, default="[]")
+
+class Question(Base):
+    __tablename__="questions"
+    id: Mapped[int]=mapped_column(primary_key=True)
+    language: Mapped[str]=mapped_column(String(10))
+    level: Mapped[int]=mapped_column(Integer, default=0)
+    skill: Mapped[str]=mapped_column(String(50))
+    prompt: Mapped[str]=mapped_column(Text)
+    options: Mapped[str]=mapped_column(Text, default="[]")
+    answer: Mapped[str]=mapped_column(Text)
+
+class Achievement(Base):
+    __tablename__="achievements"
+    id: Mapped[int]=mapped_column(primary_key=True)
+    code: Mapped[str]=mapped_column(String(80), unique=True)
+    title: Mapped[str]=mapped_column(String(200))
+    description: Mapped[str]=mapped_column(Text, default="")
+
+class ChildAchievement(Base):
+    __tablename__="child_achievements"
+    id: Mapped[int]=mapped_column(primary_key=True)
+    child_id: Mapped[int]=mapped_column(ForeignKey("children.id"))
+    achievement_id: Mapped[int]=mapped_column(ForeignKey("achievements.id"))
+    earned_at: Mapped[datetime]=mapped_column(DateTime, default=datetime.utcnow)
+
+class DailyPlan(Base):
+    __tablename__="daily_plans"
+    id: Mapped[int]=mapped_column(primary_key=True)
+    child_id: Mapped[int]=mapped_column(ForeignKey("children.id"))
+    date: Mapped[str]=mapped_column(String(10))
+    language: Mapped[str]=mapped_column(String(10))
+    minutes: Mapped[int]=mapped_column(Integer, default=20)
+    completed: Mapped[bool]=mapped_column(Boolean, default=False)
