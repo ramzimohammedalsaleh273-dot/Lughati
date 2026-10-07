@@ -3,6 +3,7 @@ from app.database import SessionLocal
 from app.models import Child, Lesson, Word, Story, Question, Achievement, DailyPlan
 from app.curriculum import ARABIC_LEVELS, ENGLISH_LEVELS
 from app.content import AR_WORDS, EN_WORDS
+from app.content_pack import ARABIC_BODIES, ENGLISH_BODIES
 
 def seed_content():
     with SessionLocal() as s:
@@ -18,7 +19,7 @@ def seed_content():
                 ]:
                     lang="ar" if title==at else "en"
                     if not s.query(Lesson).filter_by(language=lang,level=level,title=title).first():
-                        s.add(Lesson(language=lang,level=level,title=title,skill=skill,body=body))
+                        s.add(Lesson(language=lang,level=level,title=title,skill=skill,body=(ARABIC_BODIES[level] if lang=="ar" else ENGLISH_BODIES[level])))
         if s.query(Word).count() < len(AR_WORDS)+len(EN_WORDS):
             for level,(text,meaning) in enumerate(AR_WORDS):
                 if not s.query(Word).filter_by(language="ar",text=text).first():
@@ -29,8 +30,12 @@ def seed_content():
         stories=[
           ("ar",0,"حكاية الحرف","كان حرف الألف يبحث عن أصدقائه. قابل باء وتاء، وتعلموا أن القراءة تبدأ من معرفة الحروف."),
           ("ar",4,"يوم في المدرسة","ذهب سامي إلى المدرسة، رتب كتبه وقرأ قصة قصيرة ثم كتب جملة جميلة."),
+          ("ar",8,"رحلة إلى المكتبة","دخلت ليان المكتبة واختارت كتاباً مناسباً ثم جلست تقرأ بهدوء."),
+          ("ar",12,"مغامرة اللغة","تعلم خالد كيف يستخدم القراءة والكتابة والاستماع والتحدث في يومه."),
           ("en",0,"A Little Cat","A little cat sees the sun. The cat runs and plays."),
-          ("en",4,"At School","Maya goes to school. She reads a book and writes a sentence.")
+          ("en",4,"At School","Maya goes to school. She reads a book and writes a sentence."),
+          ("en",8,"At the Library","Maya visits the library, chooses a book and reads quietly."),
+          ("en",12,"Language Adventure","Sam uses reading, writing, listening and speaking in everyday life.")
         ]
         for lang,level,title,body in stories:
             if not s.query(Story).filter_by(language=lang,title=title).first():
