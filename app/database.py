@@ -1,5 +1,5 @@
 from pathlib import Path
-from sqlalchemy import create_engine, event, text
+from sqlalchemy import create_engine, event
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 ROOT=Path(__file__).resolve().parent.parent
@@ -14,7 +14,7 @@ def _sqlite_pragmas(dbapi_connection, connection_record):
     cursor.execute("PRAGMA journal_mode=WAL")
     cursor.execute("PRAGMA synchronous=NORMAL")
     cursor.close()
-SessionLocal=sessionmaker(bind=engine,autoflush=False,autocommit=False)
+SessionLocal=sessionmaker(bind=engine,autoflush=False,autocommit=False,expire_on_commit=False)
 Base=declarative_base()
 
 def init_db():
