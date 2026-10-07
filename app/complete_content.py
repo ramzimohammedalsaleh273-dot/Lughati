@@ -53,11 +53,22 @@ def build_extended_words():
     rows=[]
     for lang in ("ar","en"):
         vocab=_words(lang)
+        nouns=[x for x in vocab if len(x[0])>=3][:80]
+        modifiers=[x for x in vocab if len(x[0])>=3][80:160]
         for level in range(13):
             start=(level*17)%len(vocab)
-            for i in range(min(35,len(vocab))):
-                term,meaning,example=vocab[(start+i)%len(vocab)]
+            chosen=vocab[start:start+100]
+            if len(chosen)<100: chosen=(vocab[start:]+vocab)[:100]
+            for i,(term,meaning,example) in enumerate(chosen):
                 rows.append({"language":lang,"text":term,"meaning":meaning,"example":example,"level":level})
+            for i in range(100):
+                a=modifiers[(level*7+i)%len(modifiers)][0]
+                b=nouns[(level*11+i)%len(nouns)][0]
+                phrase=(f"{a} {b}" if lang=="en" else f"{a} {b}")
+                rows.append({"language":lang,"text":phrase,
+                             "meaning":phrase,
+                             "example":(f"I can use “{phrase}” in context." if lang=="en" else f"أستعمل «{phrase}» في جملة.") ,
+                             "level":level})
     return rows
 def build_age_stories():
     rows=[]
