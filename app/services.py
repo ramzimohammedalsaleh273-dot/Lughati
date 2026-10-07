@@ -1,10 +1,22 @@
 from datetime import datetime, timedelta
-from sqlalchemy import select
+from sqlalchemy import select, func
 from app.database import SessionLocal
-from app.models import Child, Lesson, Word, Progress, TestResult, ReviewItem, Story, Question, DailyPlan
+from app.models import Child, Lesson, Word, Progress, TestResult, ReviewItem, Story, Question, DailyPlan, Achievement, ChildAchievement
+from app.state import child_id as session_child_id
+
+def children():
+    with SessionLocal() as s: return list(s.scalars(select(Child).order_by(Child.id)).all())
 
 def get_child():
-    with SessionLocal() as s: return s.scalar(select(Child).order_by(Child.id))
+    wanted=session_child_id()
+    with SessionLocal() as s:
+        if wanted:
+            child=s.get(Child,wanted)
+            if child: return child
+        return s.scalar(select(Child).order_by(Child.id))
+
+def get_child_by_id(child_id):
+    with SessionLocal() as s: return s.get(Child,int(child_id))
 
 def lessons(language=None, level=None):
     with SessionLocal() as s:
@@ -28,14 +40,14 @@ def save_lesson(child_id, lesson_id, score):
         p.score=max(p.score,score); p.mastered=p.score>=80; p.updated_at=datetime.utcnow(); s.commit()
 
 def save_test(child_id,language,skill,score):
-    with SessionLocal() as s: s.add(TestResult(child_id=child_id,language=language,skill=skill,score=score)); s.commit()
+    with SessionLocal() as s:
+        s.add(TestResult(child_id=child_id,language=language,skill=skill,score=score)); s.commit()
 
 def dashboard(child_id):
     with SessionLocal() as s:
         ps=list(s.scalars(select(Progress).where(Progress.child_id==child_id)))
         ts=list(s.scalars(select(TestResult).where(TestResult.child_id==child_id)))
         return len(ps), sum(1 for p in ps if p.mastered), round(sum(t.score for t in ts)/len(ts),1) if ts else 0
-
 
 def stories(language=None, level=None):
     with SessionLocal() as s:
@@ -54,11 +66,7 @@ def questions(language=None, level=None, skill=None):
 
 def search_words(language, query_text):
     q=query_text.strip()
-    if not q: return words(language)
-    with SessionLocal() as s:
-        stmt=select(Word).where(Word.language==language).where(Word.text.contains(q) | Word.meaning.contains(q)).order_by(Word.level,Word.id)
-        return list(s.scalars(stmt).all())
-
+    return words(language,query=q)
 
 def create_daily_plan(child_id,language="ar",minutes=20):
     today=datetime.now().date().isoformat()
@@ -67,3 +75,41 @@ def create_daily_plan(child_id,language="ar",minutes=20):
         if not p:
             p=DailyPlan(child_id=child_id,date=today,language=language,minutes=minutes); s.add(p); s.commit()
         return p
+
+def complete_daily_plan(child_id, language):
+    today=datetime.now().date().isoformat()
+    with SessionLocal() as s:
+        p=s.scalar(select(DailyPlan).where(DailyPlan.child_id==child_id,DailyPlan.date==today,DailyPlan.language==language))
+        if p: p.completed=True; s.commit()
+        return bool(p)
+
+def progress_for(child_id,language=None):
+    with SessionLocal() as s:
+        q=select(Progress,Lesson).join(Lesson,Lesson.id==Progress.lesson_id).where(Progress.child_id==child_id)
+        if language: q=q.where(Lesson.language==language)
+        return list(s.execute(q).all())
+
+def achievement_status(child_id):
+    with SessionLocal() as s:
+        all_items=list(s.scalars(select(Achievement).order_by(Achievement.id)).all())
+        earned={x.achievement_id for x in s.scalars(select(ChildAchievement).where(ChildAchievement.child_id==child_id)).all()}
+        return [(a,a.id in earned) for a in all_items]
+
+def award(child_id,code):
+    with SessionLocal() as s:
+        a=s.scalar(select(Achievement).where(Achievement.code==code))
+        if not a: return False
+        exists=s.scalar(select(ChildAchievement).where(ChildAchievement.child_id==child_id,ChildAchievement.achievement_id==a.id))
+        if exists: return False
+        s.add(ChildAchievement(child_id=child_id,achievement_id=a.id)); s.commit(); return True
+
+def auto_award(child_id):
+    with SessionLocal() as s:
+        lesson_count=s.scalar(select(func.count()).select_from(Progress).where(Progress.child_id==child_id)) or 0
+        test_count=s.scalar(select(func.count()).select_from(TestResult).where(TestResult.child_id==child_id)) or 0
+        word_count=s.scalar(select(func.count()).select_from(ReviewItem).where(ReviewItem.child_id==child_id)) or 0
+        earned=[]
+        if lesson_count>=1: earned.append("first_lesson")
+        if word_count>=5: earned.append("five_words")
+        if test_count>=1: earned.append("first_test")
+    for code in earned: award(child_id,code)
