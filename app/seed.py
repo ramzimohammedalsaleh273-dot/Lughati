@@ -1,64 +1,121 @@
 import json
 from app.database import SessionLocal
-from app.models import Child, Lesson, Word, Story, Question, Achievement, DailyPlan
+from app.models import Child, Lesson, Word, Story, Question, Achievement
 from app.curriculum import ARABIC_LEVELS, ENGLISH_LEVELS
-from app.content import AR_WORDS, EN_WORDS
 from app.content_pack import ARABIC_BODIES, ENGLISH_BODIES
+
+AR_WORD_BANK=[
+("أب","father"),("أم","mother"),("بيت","house"),("باب","door"),("كتاب","book"),("قلم","pen"),
+("مدرسة","school"),("معلم","teacher"),("طالب","student"),("ماء","water"),("طعام","food"),("شمس","sun"),
+("قمر","moon"),("سماء","sky"),("أرض","earth"),("شجرة","tree"),("زهرة","flower"),("بحر","sea"),
+("سيارة","car"),("طريق","road"),("صديق","friend"),("أسرة","family"),("ولد","boy"),("بنت","girl"),
+("يقرأ","reads"),("يكتب","writes"),("يذهب","goes"),("يأتي","comes"),("يجلس","sits"),("يقوم","stands"),
+("كبير","big"),("صغير","small"),("جميل","beautiful"),("جديد","new"),("قديم","old"),("سريع","fast"),
+("بطيء","slow"),("اليوم","today"),("غداً","tomorrow"),("أمس","yesterday"),("واحد","one"),("اثنان","two"),
+("ثلاثة","three"),("أربعة","four"),("خمسة","five"),("أين","where"),("متى","when"),("كيف","how"),
+("لماذا","why"),("نعم","yes"),("لا","no"),("صباح","morning"),("مساء","evening"),("لغة","language"),
+("تعلم","learning"),("قراءة","reading"),("كتابة","writing"),("استماع","listening"),("تحدث","speaking")
+]
+EN_WORD_BANK=[
+("father","أب"),("mother","أم"),("house","بيت"),("door","باب"),("book","كتاب"),("pen","قلم"),
+("school","مدرسة"),("teacher","معلم"),("student","طالب"),("water","ماء"),("food","طعام"),("sun","شمس"),
+("moon","قمر"),("sky","سماء"),("earth","أرض"),("tree","شجرة"),("flower","زهرة"),("sea","بحر"),
+("car","سيارة"),("road","طريق"),("friend","صديق"),("family","أسرة"),("boy","ولد"),("girl","بنت"),
+("read","يقرأ"),("write","يكتب"),("go","يذهب"),("come","يأتي"),("sit","يجلس"),("stand","يقوم"),
+("big","كبير"),("small","صغير"),("beautiful","جميل"),("new","جديد"),("old","قديم"),("fast","سريع"),
+("slow","بطيء"),("today","اليوم"),("tomorrow","غداً"),("yesterday","أمس"),("one","واحد"),("two","اثنان"),
+("three","ثلاثة"),("four","أربعة"),("five","خمسة"),("where","أين"),("when","متى"),("how","كيف"),
+("why","لماذا"),("yes","نعم"),("no","لا"),("morning","صباح"),("evening","مساء"),("language","لغة"),
+("learning","تعلم"),("reading","قراءة"),("writing","كتابة"),("listening","استماع"),("speaking","تحدث")
+]
+
+AR_STORY_TEMPLATES=[
+("بداية الحروف","بدأ الطفل يتعرف إلى الأصوات والحروف من حوله."),
+("أصدقاء الحروف","تعرّف الطفل إلى أشكال الحروف وربطها بأصواتها."),
+("رحلة الحركات","تدرب الطفل على الفتحة والضمة والكسرة والمدود."),
+("كلمات من حياتنا","قرأ الطفل كلمات قصيرة واستعملها في مواقف يومية."),
+("جمل مفيدة","بنى الطفل جملاً اسمية ووصف الأشياء من حوله."),
+("أفعال يومية","استخدم الطفل الأفعال والفاعل في جمل صحيحة."),
+("قارئ صغير","قرأ الطفل نصاً قصيراً وحدد فكرته وتفاصيله."),
+("يوم الكتابة","كتب الطفل كلمات وجملاً وأتقن بعض قواعد الإملاء."),
+("مغامرة القواعد","استخدم الطفل الضمائر والمذكر والمؤنث وحروف الجر."),
+("حديث جميل","تحدث الطفل عن يومه ووصف مكاناً يحبه."),
+("ورشة النحو","حل الطفل تدريبات على التراكيب والنحو في سياقات حقيقية."),
+("قارئ متأمل","قرأ الطفل نصاً أطول واستنتج المعاني ولخص الأفكار."),
+("طلاقة اللغة","استخدم الطفل العربية في القراءة والكتابة والاستماع والتحدث.")
+]
+EN_STORY_TEMPLATES=[
+("First Sounds","A learner starts by hearing and naming simple sounds."),
+("Letter Friends","A learner connects letters with their common sounds."),
+("Sound Blending","A learner blends short sounds and reads simple words."),
+("Everyday Words","A learner uses useful words in familiar daily situations."),
+("Simple Sentences","A learner builds clear short sentences and questions."),
+("Daily Actions","A learner uses verbs and basic grammar in context."),
+("A Young Reader","A learner reads a short text and finds its main idea."),
+("Writing Day","A learner writes words, sentences and a short paragraph."),
+("Grammar Adventure","A learner uses pronouns, prepositions and everyday phrases."),
+("Useful Conversation","A learner talks about routines, places and preferences."),
+("Grammar Workshop","A learner practises intermediate structures in context."),
+("Thoughtful Reader","A learner reads longer text and infers meaning."),
+("Functional English","A learner uses English for practical real-life tasks.")
+]
+
+def _add_lesson(s,lang,level,title,skill,body):
+    if not s.query(Lesson).filter_by(language=lang,level=level,title=title).first():
+        s.add(Lesson(language=lang,level=level,title=title,skill=skill,body=body))
+
+def _add_word(s,lang,text,meaning,level,example):
+    if not s.query(Word).filter_by(language=lang,text=text).first():
+        s.add(Word(language=lang,text=text,meaning=meaning,level=level,example=example))
+
+def _add_question(s,lang,level,skill,prompt,options,answer):
+    if not s.query(Question).filter_by(language=lang,level=level,prompt=prompt).first():
+        s.add(Question(language=lang,level=level,skill=skill,prompt=prompt,options=json.dumps(options,ensure_ascii=False),answer=answer))
 
 def seed_content():
     with SessionLocal() as s:
-        if not s.query(Child).first():
-            s.add(Child(name="الطفل", age=6)); s.flush()
-        if s.query(Lesson).count() < 26:
-            for level in range(13):
-                at=ARABIC_LEVELS[level]
-                et=ENGLISH_LEVELS[level]
-                for title,skill,body in [
-                    (at,"reading",f"الوحدة العربية {level}: {at}"),
-                    (et,"reading",f"English level {level}: {et}"),
-                ]:
-                    lang="ar" if title==at else "en"
-                    if not s.query(Lesson).filter_by(language=lang,level=level,title=title).first():
-                        s.add(Lesson(language=lang,level=level,title=title,skill=skill,body=(ARABIC_BODIES[level] if lang=="ar" else ENGLISH_BODIES[level])))
-        if s.query(Word).count() < len(AR_WORDS)+len(EN_WORDS):
-            for level,(text,meaning) in enumerate(AR_WORDS):
-                if not s.query(Word).filter_by(language="ar",text=text).first():
-                    s.add(Word(language="ar",text=text,meaning=meaning,example=f"{text} مثال",level=min(level,12)))
-            for level,(text,meaning) in enumerate(EN_WORDS):
-                if not s.query(Word).filter_by(language="en",text=text).first():
-                    s.add(Word(language="en",text=text,meaning=meaning,example=f"Example: {text}",level=min(level,12)))
-        stories=[
-          ("ar",0,"حكاية الحرف","كان حرف الألف يبحث عن أصدقائه. قابل باء وتاء، وتعلموا أن القراءة تبدأ من معرفة الحروف."),
-          ("ar",4,"يوم في المدرسة","ذهب سامي إلى المدرسة، رتب كتبه وقرأ قصة قصيرة ثم كتب جملة جميلة."),
-          ("ar",8,"رحلة إلى المكتبة","دخلت ليان المكتبة واختارت كتاباً مناسباً ثم جلست تقرأ بهدوء."),
-          ("ar",12,"مغامرة اللغة","تعلم خالد كيف يستخدم القراءة والكتابة والاستماع والتحدث في يومه."),
-          ("en",0,"A Little Cat","A little cat sees the sun. The cat runs and plays."),
-          ("en",4,"At School","Maya goes to school. She reads a book and writes a sentence."),
-          ("en",8,"At the Library","Maya visits the library, chooses a book and reads quietly."),
-          ("en",12,"Language Adventure","Sam uses reading, writing, listening and speaking in everyday life.")
-        ]
-        for lang,level,title,body in stories:
-            if not s.query(Story).filter_by(language=lang,title=title).first():
-                s.add(Story(language=lang,level=level,title=title,body=body,questions=json.dumps([],ensure_ascii=False)))
-        qs=[
-          ("ar",0,"reading","ما أول حرف في كلمة «أب»؟",json.dumps(["أ","ب","ت"],ensure_ascii=False),"أ"),
-          ("ar",2,"grammar","اختر الحركة في «بُ»",json.dumps(["الفتحة","الضمة","الكسرة"],ensure_ascii=False),"الضمة"),
-          ("ar",4,"reading","أي جملة صحيحة؟",json.dumps(["هذا كتاب.","هذا كتب.","هذا كتابان."],ensure_ascii=False),"هذا كتاب."),
-          ("en",0,"vocabulary","What is «cat»?",json.dumps(["قطة","كلب","كتاب"],ensure_ascii=False),"قطة"),
-          ("en",2,"reading","Which word is CVC?",json.dumps(["cat","school","beautiful"],ensure_ascii=False),"cat"),
-          ("en",4,"grammar","Choose: I ___ a book.",json.dumps(["have","has","having"],ensure_ascii=False),"have")
-        ]
+        child=s.query(Child).first()
+        if not child:
+            s.add(Child(name="الطفل",age=6)); s.flush()
+
         for level in range(13):
-            generated=[
-              ("ar",level,"reading",f"ما هدف المستوى {level}؟",json.dumps(["التعلم والتطبيق","التوقف عن التعلم","حذف الكلمات"],ensure_ascii=False),"التعلم والتطبيق"),
-              ("en",level,"reading",f"What is the goal of level {level}?",json.dumps(["Learning and practice","Stop learning","Delete words"],ensure_ascii=False),"Learning and practice")]
-            for lang,lv,skill,prompt,options,answer in generated:
-                if not s.query(Question).filter_by(language=lang,prompt=prompt).first():
-                    s.add(Question(language=lang,level=lv,skill=skill,prompt=prompt,options=options,answer=answer))
-        for lang,level,skill,prompt,options,answer in qs:
-            if not s.query(Question).filter_by(language=lang,prompt=prompt).first():
-                s.add(Question(language=lang,level=level,skill=skill,prompt=prompt,options=options,answer=answer))
-        ach=[("first_lesson","أول درس","أكمل أول درس"),("five_words","خمس كلمات","تعلم خمس كلمات"),("first_test","أول اختبار","أكمل أول اختبار"),("story_reader","قارئ القصص","اقرأ قصة")]
-        for code,title,desc in ach:
-            if not s.query(Achievement).filter_by(code=code).first(): s.add(Achievement(code=code,title=title,description=desc))
+            ar_title=ARABIC_LEVELS[level]; en_title=ENGLISH_LEVELS[level]
+            _add_lesson(s,"ar",level,ar_title,"reading",ARABIC_BODIES[level])
+            _add_lesson(s,"en",level,en_title,"reading",ENGLISH_BODIES[level])
+            _add_lesson(s,"ar",level,f"{ar_title} — تدريب","practice",f"تدريب عملي للمستوى {level}: استماع وقراءة وكتابة وتطبيق.")
+            _add_lesson(s,"en",level,f"{en_title} — Practice","practice",f"Practice for level {level}: listening, reading, writing and real use.")
+            _add_lesson(s,"ar",level,f"{ar_title} — مراجعة","review",f"مراجعة تراكمية للمفردات والمهارات الأساسية في المستوى {level}.")
+            _add_lesson(s,"en",level,f"{en_title} — Review","review",f"Cumulative review of vocabulary and core skills for level {level}.")
+            if level < len(AR_STORY_TEMPLATES):
+                st,body=AR_STORY_TEMPLATES[level]
+                if not s.query(Story).filter_by(language="ar",level=level,title=st).first():
+                    s.add(Story(language="ar",level=level,title=st,body=body,questions=json.dumps([{"prompt":"ما الفكرة الأساسية؟","answer":"التعلم والتطبيق"}],ensure_ascii=False)))
+                st,body=EN_STORY_TEMPLATES[level]
+                if not s.query(Story).filter_by(language="en",level=level,title=st).first():
+                    s.add(Story(language="en",level=level,title=st,body=body,questions=json.dumps([{"prompt":"What is the main idea?","answer":"Learning and practice"}],ensure_ascii=False)))
+
+            _add_question(s,"ar",level,"reading",f"المستوى {level}: اختر العبارة الصحيحة.",["التعلم والتطبيق","التوقف عن التعلم","حذف الكلمات"],"التعلم والتطبيق")
+            _add_question(s,"ar",level,"vocabulary",f"المستوى {level}: ما معنى كلمة «كتاب»؟",["book","water","sun"],"book")
+            _add_question(s,"ar",level,"writing",f"المستوى {level}: أي جملة مكتوبة بصورة صحيحة؟",["هذا كتاب.","هذا كتاب","كتاب هذا."],"هذا كتاب.")
+            _add_question(s,"en",level,"reading",f"Level {level}: choose the best goal.",["Learning and practice","Stop learning","Delete words"],"Learning and practice")
+            _add_question(s,"en",level,"vocabulary",f"Level {level}: What does “book” mean?",["كتاب","ماء","شمس"],"كتاب")
+            _add_question(s,"en",level,"grammar",f"Level {level}: Choose the correct sentence.",["I have a book.","I has a book.","I having book."],"I have a book.")
+
+        for i,(text,meaning) in enumerate(AR_WORD_BANK):
+            _add_word(s,"ar",text,meaning,min(i//5,12),f"{text} في جملة مفيدة.")
+        for i,(text,meaning) in enumerate(EN_WORD_BANK):
+            _add_word(s,"en",text,meaning,min(i//5,12),f"Use “{text}” in a simple sentence.")
+
+        achievements=[
+            ("first_lesson","أول درس","أكمل أول درس."),
+            ("five_words","خمس كلمات","تعلم خمس كلمات."),
+            ("first_test","أول اختبار","أكمل أول اختبار."),
+            ("story_reader","قارئ القصص","افتح قصة."),
+            ("ten_lessons","عشرة دروس","أكمل عشرة دروس."),
+            ("master_level","إتقان مستوى","أتقن دروس مستوى كامل."),
+            ("daily_streak","مواظب","أكمل خطة يومية.")
+        ]
+        for code,title,desc in achievements:
+            if not s.query(Achievement).filter_by(code=code).first():
+                s.add(Achievement(code=code,title=title,description=desc))
         s.commit()
