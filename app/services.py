@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from sqlalchemy import select
 from app.database import SessionLocal
-from app.models import Child, Lesson, Word, Progress, TestResult, ReviewItem
+from app.models import Child, Lesson, Word, Progress, TestResult, ReviewItem, Story, Question
 
 def get_child():
     with SessionLocal() as s: return s.scalar(select(Child).order_by(Child.id))
@@ -26,3 +26,26 @@ def dashboard(child_id):
         ps=list(s.scalars(select(Progress).where(Progress.child_id==child_id)))
         ts=list(s.scalars(select(TestResult).where(TestResult.child_id==child_id)))
         return len(ps), sum(1 for p in ps if p.mastered), round(sum(t.score for t in ts)/len(ts),1) if ts else 0
+
+
+def stories(language=None, level=None):
+    with SessionLocal() as s:
+        q=select(Story).order_by(Story.language,Story.level,Story.id)
+        if language: q=q.where(Story.language==language)
+        if level is not None: q=q.where(Story.level==level)
+        return list(s.scalars(q).all())
+
+def questions(language=None, level=None, skill=None):
+    with SessionLocal() as s:
+        q=select(Question).order_by(Question.level,Question.id)
+        if language: q=q.where(Question.language==language)
+        if level is not None: q=q.where(Question.level==level)
+        if skill: q=q.where(Question.skill==skill)
+        return list(s.scalars(q).all())
+
+def search_words(language, query_text):
+    q=query_text.strip()
+    if not q: return words(language)
+    with SessionLocal() as s:
+        stmt=select(Word).where(Word.language==language).where(Word.text.contains(q) | Word.meaning.contains(q)).order_by(Word.level,Word.id)
+        return list(s.scalars(stmt).all())
