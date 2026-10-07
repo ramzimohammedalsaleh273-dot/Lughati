@@ -33,15 +33,19 @@ from app.ui.listening_view import ListeningView
 from app.ui.mastery_view import MasteryView
 from app.ui.recordings_view import RecordingsView
 from app.ui.rich_assessment_view import RichAssessmentView
+from app.ui.skill_dashboard_view import SkillDashboardView
+from app.ui.diagnostics_view import DiagnosticsView
+from app.ui.sync_view import SyncView
+from app.ui.parent_report_view import ParentReportView
 
 class MainWindow(QMainWindow):
  def __init__(self):
   super().__init__(); self.setWindowTitle("لغتي — مدرسة اللغات"); self.setLayoutDirection(Qt.RightToLeft)
   root=QWidget(); self.setCentralWidget(root); outer=QHBoxLayout(root)
   side=QVBoxLayout(); self.child_box=QComboBox(); side.addWidget(QLabel("الطفل الحالي")); side.addWidget(self.child_box)
-  nav=QListWidget(); nav.addItems(["الرئيسية","خطة اليوم","الخطة الذكية","العربية","English","المنهج","الكلمات","قاموس وبحث","المراجعة الذكية","الألعاب","القصص","مكتبة القصص","التحدث والنطق","التسجيلات","الاستماع","بنك الأسئلة","الاختبارات","التقييم الشامل","تحديد المستوى","التقدم","خريطة المستويات","خريطة الإتقان","المهارات","الإنجازات","ملف الطفل","الأطفال","ولي الأمر","الوسائط","مشغل الوسائط","تدريب الكتابة","المساعد","الإعدادات"]); side.addWidget(nav,1)
+  nav=QListWidget(); nav.addItems(["الرئيسية","خطة اليوم","الخطة الذكية","العربية","English","المنهج","الكلمات","قاموس وبحث","المراجعة الذكية","الألعاب","القصص","مكتبة القصص","التحدث والنطق","التسجيلات","الاستماع","بنك الأسئلة","الاختبارات","التقييم الشامل","تحديد المستوى","التقدم","خريطة المستويات","خريطة الإتقان","المهارات","لوحة المهارات","الإنجازات","ملف الطفل","الأطفال","ولي الأمر","تقرير ولي الأمر","الوسائط","مشغل الوسائط","تدريب الكتابة","المساعد","التشخيص","المزامنة","الإعدادات"]); side.addWidget(nav,1)
   self.stack=QStackedWidget(); outer.addLayout(side); outer.addWidget(self.stack,1)
-  self.widgets=[DashboardView(),PlanView(),DailyPlanView(),LessonView("ar"),LessonView("en"),CurriculumView(),WordsView(),DictionaryView(),ReviewView(),GamesView(),StoryView(),StoriesLibraryView(),SpeakingView(),RecordingsView(),ListeningView(),QuestionBankView(),TestView(),RichAssessmentView(),AssessmentView(),ProgressView(),LevelMapView(),MasteryView(),SkillsView(),AchievementsView(),ChildView(),ChildrenManagerView(),ParentView(),MediaView(),MediaPlayerView(),PracticeView(),HelpView(),SettingsView()]
+  self.widgets=[DashboardView(),PlanView(),DailyPlanView(),LessonView("ar"),LessonView("en"),CurriculumView(),WordsView(),DictionaryView(),ReviewView(),GamesView(),StoryView(),StoriesLibraryView(),SpeakingView(),RecordingsView(),ListeningView(),QuestionBankView(),TestView(),RichAssessmentView(),AssessmentView(),ProgressView(),LevelMapView(),MasteryView(),SkillsView(),SkillDashboardView(),AchievementsView(),ChildView(),ChildrenManagerView(),ParentView(),ParentReportView(),MediaView(),MediaPlayerView(),PracticeView(),HelpView(),DiagnosticsView(),SyncView(),SettingsView()]
   for w in self.widgets:self.stack.addWidget(w)
   nav.currentRowChanged.connect(self.stack.setCurrentIndex); nav.setCurrentRow(0)
   self.child_box.currentIndexChanged.connect(self._select_child)
