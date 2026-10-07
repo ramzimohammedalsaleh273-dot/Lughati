@@ -77,3 +77,5 @@ def seed_content():
             if not s.query(Achievement).filter_by(code=code).first():
                 s.add(Achievement(code=code,title=title,description=description))
         s.commit()
+    from app.settings_service import ensure_defaults
+    ensure_defaults()
