@@ -20,12 +20,12 @@ def seed_content():
                     if not s.query(Lesson).filter_by(language=lang,level=level,title=title).first():
                         s.add(Lesson(language=lang,level=level,title=title,skill=skill,body=body))
         if s.query(Word).count() < len(AR_WORDS)+len(EN_WORDS):
-            for level,(text,meaning,example) in enumerate(AR_WORDS):
+            for level,(text,meaning) in enumerate(AR_WORDS):
                 if not s.query(Word).filter_by(language="ar",text=text).first():
-                    s.add(Word(language="ar",text=text,meaning=meaning,example=example,level=min(level,12)))
-            for level,(text,meaning,example) in enumerate(EN_WORDS):
+                    s.add(Word(language="ar",text=text,meaning=meaning,example=f"{text} مثال",level=min(level,12)))
+            for level,(text,meaning) in enumerate(EN_WORDS):
                 if not s.query(Word).filter_by(language="en",text=text).first():
-                    s.add(Word(language="en",text=text,meaning=meaning,example=example,level=min(level,12)))
+                    s.add(Word(language="en",text=text,meaning=meaning,example=f"Example: {text}",level=min(level,12)))
         stories=[
           ("ar",0,"حكاية الحرف","كان حرف الألف يبحث عن أصدقائه. قابل باء وتاء، وتعلموا أن القراءة تبدأ من معرفة الحروف."),
           ("ar",4,"يوم في المدرسة","ذهب سامي إلى المدرسة، رتب كتبه وقرأ قصة قصيرة ثم كتب جملة جميلة."),
