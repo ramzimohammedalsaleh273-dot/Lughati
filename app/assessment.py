@@ -68,3 +68,16 @@ def placement_level(results):
     if average<80:return 8
     if average<90:return 10
     return 12
+
+
+def skill_breakdown(results):
+    out={}
+    for row in results:
+        out.setdefault(row.skill,[]).append(float(row.score))
+    return {k:round(sum(v)/len(v),1) for k,v in out.items()}
+
+def readiness(results):
+    scores=skill_breakdown(results)
+    average=round(sum(scores.values())/len(scores),1) if scores else 0.0
+    weak=[k for k,v in sorted(scores.items(),key=lambda x:x[1]) if v<60]
+    return {"average":average,"level":placement_level(results),"weak_skills":weak,"ready":average>=80 and not weak}
