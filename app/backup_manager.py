@@ -2,7 +2,8 @@
 from pathlib import Path
 from datetime import datetime
 import sqlite3
-from app.config import BACKUP_DIR, DB_PATH
+from app.config import BACKUP_DIR
+from app.database import DB_PATH
 from app.database import engine, init_db
 VERSION=1
 
