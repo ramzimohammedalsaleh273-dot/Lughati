@@ -48,6 +48,13 @@ def seed_content():
           ("en",2,"reading","Which word is CVC?",json.dumps(["cat","school","beautiful"],ensure_ascii=False),"cat"),
           ("en",4,"grammar","Choose: I ___ a book.",json.dumps(["have","has","having"],ensure_ascii=False),"have")
         ]
+        for level in range(13):
+            generated=[
+              ("ar",level,"reading",f"ما هدف المستوى {level}؟",json.dumps(["التعلم والتطبيق","التوقف عن التعلم","حذف الكلمات"],ensure_ascii=False),"التعلم والتطبيق"),
+              ("en",level,"reading",f"What is the goal of level {level}?",json.dumps(["Learning and practice","Stop learning","Delete words"],ensure_ascii=False),"Learning and practice")]
+            for lang,lv,skill,prompt,options,answer in generated:
+                if not s.query(Question).filter_by(language=lang,prompt=prompt).first():
+                    s.add(Question(language=lang,level=lv,skill=skill,prompt=prompt,options=options,answer=answer))
         for lang,level,skill,prompt,options,answer in qs:
             if not s.query(Question).filter_by(language=lang,prompt=prompt).first():
                 s.add(Question(language=lang,level=level,skill=skill,prompt=prompt,options=options,answer=answer))
