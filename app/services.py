@@ -64,8 +64,9 @@ def create_daily_plan(child_id,language="ar",minutes=20):
     today=datetime.now().date().isoformat()
     with SessionLocal() as s:
         p=s.scalar(select(DailyPlan).where(DailyPlan.child_id==child_id,DailyPlan.date==today,DailyPlan.language==language))
-        if not p:p=DailyPlan(child_id=child_id,date=today,language=language,minutes=minutes);s.add(p);s.commit()
-        return p
+        if not p:p=DailyPlan(child_id=child_id,date=today,language=language,minutes=minutes);s.add(p)
+        else:p.minutes=minutes
+        s.commit();return p
 def complete_daily_plan(child_id,language):
     today=datetime.now().date().isoformat()
     with SessionLocal() as s:
