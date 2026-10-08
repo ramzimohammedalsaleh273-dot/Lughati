@@ -67,10 +67,19 @@ def seed_content():
             for level in range(13):
                 for kind,title,sub in (("image","صورة تعليمية" if item=="ar" else "Learning Image","images"),("audio","تدريب صوتي" if item=="ar" else "Audio Practice","audio"),("video","درس مرئي" if item=="ar" else "Video Lesson","video")):
                     ext={"image":"svg","audio":"wav","video":"mp4"}[kind]
-                    path=str(Path(media_root[sub])/f"{item}_{level:02d}.{ext}")
+                    path = "" if kind == "audio" else str(Path(media_root[sub])/f"{item}_{level:02d}.{ext}")
+                    source = "system_speech" if kind == "audio" else "generated_local_offline"
+                    offline_ready = False if kind == "audio" else Path(path).exists()
+                    if kind == "audio":
+                        title = "نطق عبر صوت الجهاز" if item == "ar" else "تدريب نطق"
                     exists=s.query(MediaAsset).filter_by(language=item,level=level,kind=kind).first()
-                    if not exists: s.add(MediaAsset(language=item,level=level,kind=kind,title=title,path=path,source="generated_local_offline",offline_ready=Path(path).exists()))
-                    else: exists.path=path; exists.offline_ready=Path(path).exists()
+                    if not exists:
+                        s.add(MediaAsset(language=item,level=level,kind=kind,title=title,path=path,source=source,offline_ready=offline_ready))
+                    else:
+                        exists.path=path
+                        exists.source=source
+                        exists.offline_ready=offline_ready
+                        exists.title=title
         for item in LICENSED_MEDIA:
             local=Path(media_root["video"]).parent/"licensed"/item["filename"]
             exists=s.query(MediaAsset).filter_by(language=item["language"],level=item["level"],kind=item["kind"],title=item["title"]).first()
