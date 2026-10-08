@@ -15,5 +15,6 @@ void main() {
     expect(find.text('لغتي'), findsOneWidget);
     expect(find.text('خطة اليوم'), findsOneWidget);
     expect(find.text('التعلم'), findsOneWidget);
+    await db.db.close();
   });
 }
