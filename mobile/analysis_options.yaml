@@ -1,1 +1,6 @@
 include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    prefer_interpolation_to_compose_strings: false
+    avoid_renaming_method_parameters: false
