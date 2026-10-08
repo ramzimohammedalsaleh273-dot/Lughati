@@ -220,6 +220,16 @@ class AppDatabase {
   Future<void> toggleTask(int id,int done)=>db.update('daily_tasks',{'done':done},where:'id=?',whereArgs:[id]);
   Future<List<Map<String,dynamic>>> achievements(int childId)=>db.rawQuery('SELECT a.*,CASE WHEN ca.child_id IS NULL THEN 0 ELSE 1 END earned FROM achievements a LEFT JOIN child_achievements ca ON a.id=ca.achievement_id AND ca.child_id=? ORDER BY earned DESC,a.id',[childId]);
   Future<List<Map<String,dynamic>>> media(String lang)=>db.query('media',where:'language=?',whereArgs:[lang],orderBy:'type,id');
+  Future<List<Map<String,dynamic>>> allAchievements(int childId)=>achievements(childId);
+  Future<List<Map<String,dynamic>>> attempts(int childId)=>db.query('attempts',where:'child_id=?',whereArgs:[childId],orderBy:'created_at DESC',limit:100);
+  Future<int> earnAchievement(int childId,String code) async {
+    final a=await db.query('achievements',where:'code=?',whereArgs:[code],limit:1);
+    if(a.isEmpty)return 0;
+    return db.insert('child_achievements',{'child_id':childId,'achievement_id':a.first['id'],'earned_at':DateTime.now().toIso8601String()},conflictAlgorithm:ConflictAlgorithm.ignore);
+  }
+  Future<List<Map<String,dynamic>>> levelSummary(String lang,String age) async {
+    return db.rawQuery('SELECT level,COUNT(*) lessons FROM lessons WHERE language=? AND age_group=? GROUP BY level ORDER BY level',[lang,age]);
+  }
   Future<String> setting(String key,String fallback) async{final r=await db.query('settings',where:'key=?',whereArgs:[key],limit:1);return r.isEmpty?fallback:r.first['value'].toString();}
   Future<void> setSetting(String key,String value)=>db.insert('settings',{'key':key,'value':value},conflictAlgorithm:ConflictAlgorithm.replace);
 }
