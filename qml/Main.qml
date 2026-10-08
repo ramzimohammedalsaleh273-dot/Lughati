@@ -237,9 +237,15 @@ ApplicationWindow {
                                                 color: "#27364B"
                                             }
                                             Text {
-                                                text: "١٣ مستوى متدرج • " + modelData.lessonCount + " مراحل في هذا المستوى"
+                                                text: modelData.lessonCount + " مراحل تعليمية في هذا المستوى"
                                                 font.pixelSize: 15
                                                 color: "#65758A"
+                                            }
+                                            Text {
+                                                text: modelData.goal
+                                                font.pixelSize: 13
+                                                color: "#718096"
+                                                elide: Text.ElideRight
                                             }
                                         }
                                         Button {
