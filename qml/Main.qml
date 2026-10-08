@@ -537,7 +537,7 @@ ApplicationWindow {
                             }
                             Text {
                                 Layout.fillWidth: true
-                                text: "تتتابع المشاهد ويقرأها صوت Windows. هذا عرض تعليمي متحرك داخل التطبيق، وليس ملف MP4."
+                                text: "تتتابع المشاهد ويقرأها صوت Windows. هذا عرض تعليمي صوتي متتابع داخل التطبيق، وليس ملف MP4."
                                 wrapMode: Text.WordWrap
                                 font.pixelSize: 14
                                 color: "#7A8797"
