@@ -5,6 +5,7 @@ import 'games_screen.dart';
 import 'stories_screen.dart';
 import 'parent_screen.dart';
 import 'media_screen.dart';
+import 'more_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final AppDatabase db;
@@ -65,6 +66,7 @@ class _HomeState extends State<HomeScreen> {
                 MaterialPageRoute(builder: (_) => MediaScreen(db: widget.db)),
               ),
             ),
+            IconButton(icon: const Icon(Icons.more_horiz), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => MoreScreen(db: widget.db, language: language, ageGroup: age)))),
           ],
         ),
         body: pages[tab],
