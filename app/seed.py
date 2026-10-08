@@ -84,3 +84,9 @@ def seed_content():
         s.commit()
     from app.settings_service import ensure_defaults
     ensure_defaults()
+    from app.video_lesson_service import ensure_video_lessons
+    from app.database import SessionLocal
+    from app.models import CurriculumUnit
+    with SessionLocal() as vs:
+        units=vs.query(CurriculumUnit).all()
+    ensure_video_lessons(units)
