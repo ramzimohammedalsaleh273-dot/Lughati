@@ -476,24 +476,34 @@ ApplicationWindow {
                                 model: root.selectedLesson.words || []
                                 delegate: Rectangle {
                                     Layout.fillWidth: true
-                                    Layout.preferredHeight: 88
+                                    Layout.preferredHeight: 112
                                     radius: 18
                                     color: "white"
                                     border.color: "#E7ECF2"
                                     RowLayout {
                                         anchors.fill: parent
-                                        anchors.margins: 17
-                                        Text {
-                                            text: modelData.text
-                                            font.pixelSize: 22
-                                            font.bold: true
-                                            color: "#27364B"
+                                        anchors.margins: 16
+                                        spacing: 14
+                                        ColumnLayout {
+                                            Layout.fillWidth: true
+                                            spacing: 4
+                                            Text {
+                                                text: modelData.text + " — " + modelData.meaning
+                                                font.pixelSize: 20
+                                                font.bold: true
+                                                color: "#27364B"
+                                            }
+                                            Text {
+                                                Layout.fillWidth: true
+                                                text: modelData.example
+                                                wrapMode: Text.WordWrap
+                                                font.pixelSize: 15
+                                                color: "#65758A"
+                                            }
                                         }
-                                        Item { Layout.fillWidth: true }
-                                        Text {
-                                            text: modelData.meaning
-                                            font.pixelSize: 16
-                                            color: "#65758A"
+                                        Button {
+                                            text: "🔊"
+                                            onClicked: appBackend.speakText(modelData.text + ". " + modelData.example, root.selectedLanguage)
                                         }
                                     }
                                 }
