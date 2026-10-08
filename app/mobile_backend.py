@@ -10,9 +10,9 @@ LEVEL_TITLES = {
     "ar": ["التهيئة والأصوات", "الحروف وأشكالها", "الحركات والمقاطع", "الكلمات الأساسية",
            "الجملة الاسمية", "الجملة الفعلية", "القراءة والفهم", "الإملاء والكتابة",
            "النحو الأساسي", "التعبير والمحادثة", "النحو المتوسط", "القراءة المتقدمة", "الإتقان والتطبيق"],
-    "en": ["Getting Ready", "Alphabet", "Phonics and Blending", "Core Vocabulary",
-           "Simple Sentences", "Grammar Basics", "Reading", "Writing",
-           "Grammar in Context", "Speaking", "Intermediate Grammar", "Advanced Reading", "Functional Mastery"],
+    "en": ["التهيئة والاستماع", "الحروف الإنجليزية", "الأصوات ودمج الحروف", "الكلمات الأساسية",
+           "الجمل البسيطة", "قواعد الأفعال", "القراءة والفهم", "الكتابة والإملاء",
+           "القواعد في السياق", "التعبير والمحادثة", "القواعد المتوسطة", "القراءة المتقدمة", "الإتقان والتواصل"],
 }
 
 SKILL_TITLES = {
@@ -30,6 +30,47 @@ SKILL_TITLES = {
 
 def stage_title(language, skill):
     return SKILL_TITLES.get(language, {}).get(skill, skill)
+
+STAGE_DESCRIPTIONS = {
+    "listening": "استمع إلى النموذج، وانتبه إلى الصوت أو الكلمة المستهدفة، ثم أجب.",
+    "speaking": "انطق النموذج بوضوح، وكرره، ثم استخدمه في جملة من إنشائك.",
+    "reading": "اقرأ المثال أو النص، وحدد الفكرة والكلمات الجديدة.",
+    "writing": "اكتب الحرف أو الكلمة أو الجملة، ثم راجعها وصححها.",
+    "vocabulary": "تعلم كلمات المستوى ومعانيها، ثم استخدمها في سياق.",
+    "grammar": "لاحظ النمط اللغوي، وطبقه في مثال جديد، ثم راجع فهمك.",
+}
+LEVEL_GOALS = {
+    "ar": [
+        "الانتباه للأصوات وتمييزها والاستجابة للتعليمات البسيطة.",
+        "التعرف إلى الحروف العربية وأصواتها وكتابتها.",
+        "قراءة الحركات والمقاطع والمدود.",
+        "قراءة كلمات يومية وفهمها واستخدامها.",
+        "تكوين جمل اسمية ووصف الأشخاص والأشياء.",
+        "استخدام الأفعال والفاعل للتحدث عن الأحداث.",
+        "قراءة نصوص قصيرة واستخراج الفكرة والتفاصيل.",
+        "النسخ والإملاء وكتابة جمل صحيحة.",
+        "استخدام الضمائر وحروف الجر في جمل.",
+        "التحدث والكتابة عن الذات والروتين والمكان.",
+        "تطبيق القواعد المتوسطة داخل نصوص.",
+        "تحليل النصوص والاستنتاج والتلخيص.",
+        "استخدام العربية بطلاقة في مواقف الحياة.",
+    ],
+    "en": [
+        "تمييز الأصوات الإنجليزية واتباع تعليمات قصيرة.",
+        "ربط الحروف الإنجليزية بأسمائها وأصواتها وكتابتها.",
+        "دمج الأصوات وقراءة الكلمات القصيرة والحركات.",
+        "تعلم كلمات الحياة اليومية وقراءتها واستخدامها.",
+        "قراءة الجمل البسيطة وكتابتها وفهمها.",
+        "استخدام الأفعال والضمائر في جمل واضحة.",
+        "فهم النصوص الإنجليزية القصيرة واستخراج التفاصيل.",
+        "كتابة الكلمات والجمل والفقرات القصيرة.",
+        "استخدام القواعد في مواقف وجمل حقيقية.",
+        "التحدث عن الروتين والاحتياجات والتفضيلات.",
+        "تطبيق تراكيب اللغة المتوسطة بدقة.",
+        "تحليل النصوص الأطول واستنتاج المعاني.",
+        "التواصل باللغة الإنجليزية في مواقف الحياة.",
+    ],
+}
 
 class AppBackend(QObject):
     changed = Signal()
@@ -97,7 +138,8 @@ class AppBackend(QObject):
         with SessionLocal() as s:
             for level, title in enumerate(LEVEL_TITLES[language]):
                 count = s.query(Lesson).filter_by(language=language, level=level).count()
-                result.append({"level": level, "title": title, "lessonCount": count})
+                result.append({"level": level, "title": title, "lessonCount": count,
+                               "goal": LEVEL_GOALS[language][level]})
         return result
 
     @Slot(int, str, result="QVariantList")
@@ -114,6 +156,8 @@ class AppBackend(QObject):
                     "stage": stage,
                     "title": row.title,
                     "stageTitle": stage_title(row.language, row.skill),
+                    "stageDescription": STAGE_DESCRIPTIONS.get(row.skill, "تدرب على مهارة هذا المستوى خطوة بخطوة."),
+                    "goal": LEVEL_GOALS[row.language][row.level],
                     "skill": row.skill,
                     "body": row.body,
                     "done": self._lesson_done(s, row.id),
@@ -159,6 +203,8 @@ class AppBackend(QObject):
                 "level": row.level,
                 "title": row.title,
                 "stageTitle": stage_title(row.language, row.skill),
+                "stageDescription": STAGE_DESCRIPTIONS.get(row.skill, "تدرب على مهارة هذا المستوى خطوة بخطوة."),
+                "goal": LEVEL_GOALS[row.language][row.level],
                 "skill": row.skill,
                 "body": row.body,
                 "audioUrl": audio_url,
