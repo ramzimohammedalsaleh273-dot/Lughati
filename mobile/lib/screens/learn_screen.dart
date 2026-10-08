@@ -1,0 +1,10 @@
+import 'package:flutter/material.dart';
+import '../data/app_database.dart';
+class LearnScreen extends StatefulWidget{final AppDatabase db;const LearnScreen({super.key,required this.db});@override State<LearnScreen> createState()=>_LearnState();}
+class _LearnState extends State<LearnScreen>{String lang='ar';late Future<List<Map<String,dynamic>>> data;@override void initState(){super.initState();data=widget.db.lessons(lang);}void select(String x){setState((){lang=x;data=widget.db.lessons(lang);});}
+@override Widget build(BuildContext c)=>Directionality(textDirection:TextDirection.rtl,child:Column(children:[
+ Padding(padding:const EdgeInsets.all(12),child:SegmentedButton<String>(segments:const[ButtonSegment(value:'ar',label:Text('العربية')),ButtonSegment(value:'en',label:Text('English'))],selected:{lang},onSelectionChanged:(x)=>select(x.first))),
+ Expanded(child:FutureBuilder<List<Map<String,dynamic>>>(future:data,builder:(c,s){if(!s.hasData)return const Center(child:CircularProgressIndicator());return ListView.builder(itemCount:s.data!.length,itemBuilder:(c,i){final x=s.data![i];return Card(child:ListTile(leading:CircleAvatar(child:Text(x['level'].toString())),title:Text(x['title'].toString()),subtitle:Text(skill(x['skill'].toString())),onTap:()=>lesson(x)));});}))
+]));String skill(String x)=>{'listening':'الاستماع','speaking':'التحدث','reading':'القراءة','writing':'الكتابة','vocabulary':'المفردات','grammar':'النحو'}[x]??x;
+void lesson(Map<String,dynamic>x){showModalBottomSheet(context:context,isScrollControlled:true,builder:(c)=>Padding(padding:const EdgeInsets.all(20),child:Column(mainAxisSize:MainAxisSize.min,crossAxisAlignment:CrossAxisAlignment.stretch,children:[Text(x['title'].toString(),style:Theme.of(context).textTheme.headlineSmall),const SizedBox(height:12),Text(x['body'].toString()),const SizedBox(height:20),FilledButton(onPressed:()async{final ch=await widget.db.child();await widget.db.completeLesson(ch['id'] as int,x['id'] as int,100);if(mounted){Navigator.pop(context);ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content:Text('تم حفظ إتمام الدرس')));}},child:const Text('أكملت الدرس'))])));}
+}
