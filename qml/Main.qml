@@ -19,6 +19,8 @@ ApplicationWindow {
     property string selectedLanguage: "ar"
     property int selectedLevel: 0
     property bool selfCheckComplete: false
+    property bool videoPlaying: false
+    property int videoSceneIndex: 0
     property var selectedLesson: ({})
     property var levelRows: []
     property var lessonRows: []
@@ -38,7 +40,25 @@ ApplicationWindow {
     function openLesson(id) {
         selectedLesson = appBackend.lesson(id)
         selfCheckComplete = false
+        videoPlaying = false
+        videoSceneIndex = 0
         page = "lesson"
+    }
+
+    function speakVideoScene() {
+        var scenes = root.selectedLesson.videoScenes || []
+        if (scenes.length > 0)
+            appBackend.speakText(scenes[root.videoSceneIndex].dialogue, root.selectedLanguage)
+    }
+
+    function advanceVideoScene() {
+        var scenes = root.selectedLesson.videoScenes || []
+        if (root.videoSceneIndex + 1 >= scenes.length) {
+            root.videoPlaying = false
+            return
+        }
+        root.videoSceneIndex += 1
+        root.speakVideoScene()
     }
 
     function goBack() {
@@ -510,43 +530,99 @@ ApplicationWindow {
                             }
 
                             Text {
-                                text: "مشاهد الدرس المرئي (النص)"
+                                text: "درس مرئي تفاعلي"
                                 font.pixelSize: 23
                                 font.bold: true
                                 color: "#27364B"
                             }
                             Text {
                                 Layout.fillWidth: true
-                                text: "هذه خطة المشاهد والحوار؛ ملف الفيديو المتحرك غير مرفق حاليًا."
+                                text: "تتتابع المشاهد ويقرأها صوت Windows. هذا عرض تعليمي متحرك داخل التطبيق، وليس ملف MP4."
                                 wrapMode: Text.WordWrap
                                 font.pixelSize: 14
                                 color: "#7A8797"
                             }
-                            Repeater {
-                                model: root.selectedLesson.videoScenes || []
-                                delegate: Rectangle {
-                                    Layout.fillWidth: true
-                                    Layout.preferredHeight: 88
-                                    radius: 18
-                                    color: "white"
-                                    border.color: "#E7ECF2"
-                                    ColumnLayout {
-                                        anchors.fill: parent
-                                        anchors.margins: 15
-                                        Text {
-                                            text: modelData.order + ". " + modelData.character
-                                            font.pixelSize: 15
-                                            font.bold: true
-                                            color: "#3367A8"
+                            Rectangle {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 250
+                                radius: 24
+                                color: "#EAF3FF"
+                                border.color: "#D7E5F5"
+                                ColumnLayout {
+                                    anchors.fill: parent
+                                    anchors.margins: 22
+                                    spacing: 12
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: {
+                                            var scenes = root.selectedLesson.videoScenes || []
+                                            return scenes.length ? "المشهد " + (root.videoSceneIndex + 1) + " من " + scenes.length : "لا توجد مشاهد"
                                         }
-                                        Text {
-                                            Layout.fillWidth: true
-                                            text: modelData.dialogue || modelData.action
-                                            wrapMode: Text.WordWrap
-                                            font.pixelSize: 16
-                                            color: "#40536A"
+                                        font.pixelSize: 15
+                                        color: "#53657A"
+                                    }
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: {
+                                            var scenes = root.selectedLesson.videoScenes || []
+                                            return scenes.length ? scenes[root.videoSceneIndex].character : "لغتي"
+                                        }
+                                        horizontalAlignment: Text.AlignHCenter
+                                        font.pixelSize: 25
+                                        font.bold: true
+                                        color: "#3367A8"
+                                    }
+                                    Text {
+                                        Layout.fillWidth: true
+                                        Layout.fillHeight: true
+                                        text: {
+                                            var scenes = root.selectedLesson.videoScenes || []
+                                            return scenes.length ? scenes[root.videoSceneIndex].dialogue : ""
+                                        }
+                                        horizontalAlignment: Text.AlignHCenter
+                                        verticalAlignment: Text.AlignVCenter
+                                        wrapMode: Text.WordWrap
+                                        font.pixelSize: 23
+                                        color: "#27364B"
+                                    }
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: root.selectedLesson.example || ""
+                                        horizontalAlignment: Text.AlignHCenter
+                                        wrapMode: Text.WordWrap
+                                        font.pixelSize: 27
+                                        font.bold: true
+                                        color: "#1D6B54"
+                                    }
+                                    RowLayout {
+                                        Layout.alignment: Qt.AlignHCenter
+                                        Button {
+                                            text: root.videoPlaying ? "إيقاف مؤقت" : "ابدأ الدرس"
+                                            onClicked: {
+                                                root.videoPlaying = !root.videoPlaying
+                                                if (root.videoPlaying) root.speakVideoScene()
+                                            }
+                                        }
+                                        Button {
+                                            text: "السابق"
+                                            enabled: root.videoSceneIndex > 0
+                                            onClicked: {
+                                                root.videoSceneIndex -= 1
+                                                root.speakVideoScene()
+                                            }
+                                        }
+                                        Button {
+                                            text: "التالي"
+                                            enabled: root.videoSceneIndex < (root.selectedLesson.videoScenes || []).length - 1
+                                            onClicked: root.advanceVideoScene()
                                         }
                                     }
+                                }
+                                Timer {
+                                    interval: 7000
+                                    repeat: true
+                                    running: root.videoPlaying
+                                    onTriggered: root.advanceVideoScene()
                                 }
                             }
 
