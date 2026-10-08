@@ -58,7 +58,7 @@ class VideoLesson(Base):
     language:Mapped[str]=mapped_column(String(10)); age_group:Mapped[str]=mapped_column(String(20)); level:Mapped[int]=mapped_column(Integer)
     curriculum_unit_id:Mapped[int|None]=mapped_column(ForeignKey("curriculum_units.id"),nullable=True)
     title:Mapped[str]=mapped_column(String(250)); character:Mapped[str]=mapped_column(String(80),default="ليان"); video_path:Mapped[str]=mapped_column(String(1000),default="")
-    duration:Mapped[float]=mapped_column(Float,default=0); status:Mapped[str]=mapped_column(String(30),default="script_ready"); manifest:Mapped[str]=mapped_column(Text,default="{}"); license:Mapped[str]=mapped_column(String(100,default=""))
+    duration:Mapped[float]=mapped_column(Float,default=0); status:Mapped[str]=mapped_column(String(30),default="script_ready"); manifest:Mapped[str]=mapped_column(Text,default="{}"); license:Mapped[str]=mapped_column(String(100),default="")
 
 class VideoInteraction(Base):
     __tablename__="video_interactions"
