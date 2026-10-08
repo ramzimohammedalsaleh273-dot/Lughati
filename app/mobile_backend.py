@@ -4,7 +4,8 @@ from datetime import datetime
 from pathlib import Path
 from PySide6.QtCore import QObject, Signal, Slot, Property, QUrl
 from app.database import SessionLocal
-from app.models import Child, Lesson, Progress, Word, Story, Achievement, DailyPlan, MediaAsset, VideoLesson
+from app.models import Child, Lesson, Progress, Word, Story, Achievement, DailyPlan
+from app.curriculum_detail import curriculum as get_curriculum, stages as curriculum_stages, stage as curriculum_stage
 
 LEVEL_TITLES = {
     "ar": ["التهيئة والأصوات", "الحروف وأشكالها", "الحركات والمقاطع", "الكلمات الأساسية",
@@ -137,9 +138,10 @@ class AppBackend(QObject):
         result = []
         with SessionLocal() as s:
             for level, title in enumerate(LEVEL_TITLES[language]):
-                count = s.query(Lesson).filter_by(language=language, level=level).count()
-                result.append({"level": level, "title": title, "lessonCount": count,
-                               "goal": LEVEL_GOALS[language][level]})
+                plan = get_curriculum(language, level)
+                count = len(plan["steps"])
+                result.append({"level": level, "title": plan["title"], "lessonCount": count,
+                               "goal": plan["goal"]})
         return result
 
     @Slot(int, str, result="QVariantList")
@@ -156,18 +158,25 @@ class AppBackend(QObject):
                 "grammar": 6, "تقويم": 6,
             }
             rows.sort(key=lambda item: (stage_order.get(item.skill, 99), item.id))
-            for stage, row in enumerate(rows, 1):
+            plan = get_curriculum(language, level)
+            for stage_number, row in enumerate(rows, 1):
+                detail = curriculum_stage(language, level, stage_number - 1)
                 result.append({
                     "id": row.id,
                     "language": row.language,
                     "level": row.level,
-                    "stage": stage,
-                    "title": row.title,
-                    "stageTitle": stage_title(row.language, row.skill),
-                    "stageDescription": STAGE_DESCRIPTIONS.get(row.skill, "تدرب على مهارة هذا المستوى خطوة بخطوة."),
-                    "goal": LEVEL_GOALS[row.language][row.level],
+                    "stage": stage_number,
+                    "title": detail["title"],
+                    "stageTitle": detail["title"],
+                    "stageDescription": detail["target"],
+                    "target": detail["target"],
+                    "example": detail["example"],
+                    "instruction": detail["instruction"],
+                    "practice": detail["practice"],
+                    "check": detail["check"],
+                    "review": detail["review"],
+                    "goal": plan["goal"],
                     "skill": row.skill,
-                    "body": row.body,
                     "done": self._lesson_done(s, row.id),
                 })
         return result
@@ -190,35 +199,49 @@ class AppBackend(QObject):
             audio_url = ""
             if audio and audio.path and Path(audio.path).is_file():
                 audio_url = QUrl.fromLocalFile(str(Path(audio.path).resolve())).toString()
-            video = (s.query(VideoLesson).filter_by(language=row.language, level=row.level)
-                     .order_by(VideoLesson.id).first())
-            video_scenes = []
-            if video and video.manifest:
-                try:
-                    manifest = json.loads(video.manifest)
-                    video_scenes = [
-                        {"order": scene.get("order", index + 1),
-                         "character": scene.get("character", ""),
-                         "dialogue": scene.get("dialogue", ""),
-                         "action": scene.get("action", "")}
-                        for index, scene in enumerate(manifest.get("scenes", []))
-                    ]
-                except (TypeError, ValueError):
-                    video_scenes = []
+            stage_number = {
+                "listening": 1, "استماع": 1, "vocabulary": 2, "مفردات": 2,
+                "speaking": 3, "تحدث": 3, "reading": 4, "قراءة": 4,
+                "writing": 5, "كتابة": 5, "grammar": 6, "تقويم": 6,
+            }.get(row.skill, 1)
+            detail = curriculum_stage(row.language, row.level, stage_number - 1)
+            plan = get_curriculum(row.language, row.level)
+            speech_text = f"{detail['target']}. {detail['example']}"
+            video_scenes = [
+                {"order": 1, "character": "ليان", "dialogue": "أهلًا! سنتعلم اليوم: " + detail["target"]},
+                {"order": 2, "character": "سامي", "dialogue": "شاهد المثال: " + detail["example"]},
+                {"order": 3, "character": "ليان", "dialogue": detail["practice"]},
+                {"order": 4, "character": "سامي", "dialogue": detail["check"]},
+            ]
             return {
                 "id": row.id,
                 "language": row.language,
                 "level": row.level,
-                "title": row.title,
-                "stageTitle": stage_title(row.language, row.skill),
-                "stageDescription": STAGE_DESCRIPTIONS.get(row.skill, "تدرب على مهارة هذا المستوى خطوة بخطوة."),
-                "goal": LEVEL_GOALS[row.language][row.level],
+                "title": detail["title"],
+                "stageTitle": detail["title"],
+                "stageDescription": detail["target"],
+                "goal": plan["goal"],
+                "target": detail["target"],
+                "example": detail["example"],
+                "instruction": detail["instruction"],
+                "practice": detail["practice"],
+                "check": detail["check"],
+                "review": detail["review"],
+                "audioText": speech_text,
                 "skill": row.skill,
-                "body": row.body,
-                "audioUrl": audio_url,
+                "body": detail["instruction"],
+                "audioUrl": "",
                 "videoScenes": video_scenes,
                 "words": [{"text": w.text, "meaning": w.meaning, "example": w.example} for w in words],
             }
+
+    @Slot(str, str, result=bool)
+    def speakText(self, text, language="ar"):
+        try:
+            from app.tts import speak
+            return bool(speak(str(text), "ar" if language == "ar" else "en"))
+        except (OSError, RuntimeError, ValueError):
+            return False
 
     @Slot(int, float, result=bool)
     def completeLesson(self, lesson_id, score=100):
