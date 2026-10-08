@@ -434,6 +434,47 @@ ApplicationWindow {
                                 }
                             }
 
+                            Text {
+                                text: "مشاهد الدرس المرئي (النص)"
+                                font.pixelSize: 23
+                                font.bold: true
+                                color: "#27364B"
+                            }
+                            Text {
+                                Layout.fillWidth: true
+                                text: "هذه خطة المشاهد والحوار؛ ملف الفيديو المتحرك غير مرفق حاليًا."
+                                wrapMode: Text.WordWrap
+                                font.pixelSize: 14
+                                color: "#7A8797"
+                            }
+                            Repeater {
+                                model: root.selectedLesson.videoScenes || []
+                                delegate: Rectangle {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: 88
+                                    radius: 18
+                                    color: "white"
+                                    border.color: "#E7ECF2"
+                                    ColumnLayout {
+                                        anchors.fill: parent
+                                        anchors.margins: 15
+                                        Text {
+                                            text: modelData.order + ". " + modelData.character
+                                            font.pixelSize: 15
+                                            font.bold: true
+                                            color: "#3367A8"
+                                        }
+                                        Text {
+                                            Layout.fillWidth: true
+                                            text: modelData.dialogue || modelData.action
+                                            wrapMode: Text.WordWrap
+                                            font.pixelSize: 16
+                                            color: "#40536A"
+                                        }
+                                    }
+                                }
+                            }
+
                             Button {
                                 text: "أنهيت المرحلة"
                                 Layout.preferredHeight: 52
