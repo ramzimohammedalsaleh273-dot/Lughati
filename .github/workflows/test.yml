@@ -28,3 +28,7 @@ jobs:
         run: flutter analyze
       - working-directory: mobile
         run: flutter test
+      - working-directory: mobile
+        run: flutter create --platforms android .
+      - working-directory: mobile
+        run: flutter build apk --debug
