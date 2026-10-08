@@ -18,6 +18,7 @@ ApplicationWindow {
     property string page: "languages"
     property string selectedLanguage: "ar"
     property int selectedLevel: 0
+    property bool selfCheckComplete: false
     property var selectedLesson: ({})
     property var levelRows: []
     property var lessonRows: []
@@ -36,6 +37,7 @@ ApplicationWindow {
 
     function openLesson(id) {
         selectedLesson = appBackend.lesson(id)
+        selfCheckComplete = false
         page = "lesson"
     }
 
@@ -328,12 +330,13 @@ ApplicationWindow {
                                             }
                                         }
                                         Text {
-                                            text: modelData.done ? "✓ مكتمل" : ""
-                                            font.pixelSize: 15
-                                            color: "#27834E"
+                                            text: modelData.done ? "✓ مكتمل" : (modelData.locked ? "أكمل المرحلة السابقة أولًا" : "")
+                                            font.pixelSize: 13
+                                            color: modelData.done ? "#27834E" : "#8A6B2B"
                                         }
                                         Button {
-                                            text: "ابدأ"
+                                            text: modelData.done ? "مراجعة" : (modelData.locked ? "مقفل" : "ابدأ")
+                                            enabled: !modelData.locked
                                             onClicked: root.openLesson(modelData.id)
                                         }
                                     }
@@ -450,6 +453,11 @@ ApplicationWindow {
                                         font.pixelSize: 16
                                         color: "#40536A"
                                     }
+                                    CheckBox {
+                                        text: "أجبت عن سؤال التحقق وأنهيت التدريب"
+                                        checked: root.selfCheckComplete
+                                        onToggled: root.selfCheckComplete = checked
+                                    }
                                     Button {
                                         text: "🔊 استمع إلى المثال"
                                         enabled: (root.selectedLesson.audioText || "").length > 0
@@ -534,6 +542,7 @@ ApplicationWindow {
 
                             Button {
                                 text: "أنهيت المرحلة"
+                                enabled: root.selfCheckComplete
                                 Layout.preferredHeight: 52
                                 onClicked: {
                                     appBackend.completeLesson(root.selectedLesson.id, 100)
