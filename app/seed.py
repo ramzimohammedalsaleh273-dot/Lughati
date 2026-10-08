@@ -64,12 +64,17 @@ def seed_content():
         media_root=ensure_media(Path(__file__).resolve().parents[1]/"media")
         for item in ("ar","en"):
             for level in range(13):
-                for kind,title,sub in (("image","صورة تعليمية" if item=="ar" else "Learning Image","images"),("audio","تدريب صوتي" if item=="ar" else "Audio Practice","audio"),("video","درس مرئي" if item=="ar" else "Video Lesson","video")):
-                    ext={"image":"svg","audio":"wav","video":"mp4"}[kind]
+                for kind,title,sub,ext in (
+                    ("image","صورة تعليمية" if item=="ar" else "Learning Image","images","svg"),
+                    ("audio","تدريب صوتي" if item=="ar" else "Audio Practice","audio","wav"),
+                ):
                     path=str(Path(media_root[sub])/f"{item}_{level:02d}.{ext}")
                     exists=s.query(MediaAsset).filter_by(language=item,level=level,kind=kind).first()
-                    if not exists: s.add(MediaAsset(language=item,level=level,kind=kind,title=title,path=path,source="generated_local_offline",offline_ready=Path(path).exists()))
-                    else: exists.path=path; exists.offline_ready=Path(path).exists()
+                    if not exists:
+                        s.add(MediaAsset(language=item,level=level,kind=kind,title=title,path=path,source="generated_local_offline",offline_ready=Path(path).exists()))
+                    else:
+                        exists.path=path
+                        exists.offline_ready=Path(path).exists()
         for item in LICENSED_MEDIA:
             local=Path(media_root["video"]).parent/"licensed"/item["filename"]
             exists=s.query(MediaAsset).filter_by(language=item["language"],level=item["level"],kind=item["kind"],title=item["title"]).first()
