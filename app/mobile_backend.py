@@ -4,7 +4,7 @@ from datetime import datetime
 from pathlib import Path
 from PySide6.QtCore import QObject, Signal, Slot, Property, QUrl
 from app.database import SessionLocal
-from app.models import Child, Lesson, Progress, Word, Story, Achievement, DailyPlan, MediaAsset
+from app.models import Child, Lesson, Progress, Word, Story, Achievement, DailyPlan, MediaAsset, VideoLesson
 
 LEVEL_TITLES = {
     "ar": ["التهيئة والأصوات", "الحروف وأشكالها", "الحركات والمقاطع", "الكلمات الأساسية",
@@ -138,6 +138,21 @@ class AppBackend(QObject):
             audio_url = ""
             if audio and audio.path and Path(audio.path).is_file():
                 audio_url = QUrl.fromLocalFile(str(Path(audio.path).resolve())).toString()
+            video = (s.query(VideoLesson).filter_by(language=row.language, level=row.level)
+                     .order_by(VideoLesson.id).first())
+            video_scenes = []
+            if video and video.manifest:
+                try:
+                    manifest = json.loads(video.manifest)
+                    video_scenes = [
+                        {"order": scene.get("order", index + 1),
+                         "character": scene.get("character", ""),
+                         "dialogue": scene.get("dialogue", ""),
+                         "action": scene.get("action", "")}
+                        for index, scene in enumerate(manifest.get("scenes", []))
+                    ]
+                except (TypeError, ValueError):
+                    video_scenes = []
             return {
                 "id": row.id,
                 "language": row.language,
@@ -147,6 +162,7 @@ class AppBackend(QObject):
                 "skill": row.skill,
                 "body": row.body,
                 "audioUrl": audio_url,
+                "videoScenes": video_scenes,
                 "words": [{"text": w.text, "meaning": w.meaning, "example": w.example} for w in words],
             }
 
