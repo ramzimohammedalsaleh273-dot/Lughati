@@ -1,8 +1,7 @@
 from __future__ import annotations
 import json
 from datetime import datetime
-from pathlib import Path
-from PySide6.QtCore import QObject, Signal, Slot, Property, QUrl
+from PySide6.QtCore import QObject, Signal, Slot, Property
 from app.database import SessionLocal
 from app.models import Child, Lesson, Progress, Word, Story, Achievement, DailyPlan
 from app.curriculum_detail import curriculum as get_curriculum, stages as curriculum_stages, stage as curriculum_stage
@@ -195,10 +194,6 @@ class AppBackend(QObject):
                 return {}
             words = (s.query(Word).filter_by(language=row.language, level=row.level)
                      .order_by(Word.id).limit(12).all())
-            audio = s.query(MediaAsset).filter_by(language=row.language, level=row.level, kind="audio").first()
-            audio_url = ""
-            if audio and audio.path and Path(audio.path).is_file():
-                audio_url = QUrl.fromLocalFile(str(Path(audio.path).resolve())).toString()
             stage_number = {
                 "listening": 1, "استماع": 1, "vocabulary": 2, "مفردات": 2,
                 "speaking": 3, "تحدث": 3, "reading": 4, "قراءة": 4,
@@ -230,7 +225,6 @@ class AppBackend(QObject):
                 "audioText": speech_text,
                 "skill": row.skill,
                 "body": detail["instruction"],
-                "audioUrl": "",
                 "videoScenes": video_scenes,
                 "words": [{"text": w.text, "meaning": w.meaning, "example": w.example} for w in words],
             }
