@@ -6,6 +6,7 @@ from app.content_authoring import build_content
 from app.vocabulary_pack import AR_EXTRA, EN_EXTRA
 from app.complete_content import build_age_units, build_extended_words, build_age_stories
 from app.media_factory import ensure_media
+from app.licensed_media import LICENSED_MEDIA
 
 def _lesson(s, data):
     row=s.query(Lesson).filter_by(language=data["language"],level=data["level"],title=data["title"]).first()
@@ -69,6 +70,13 @@ def seed_content():
                     exists=s.query(MediaAsset).filter_by(language=item,level=level,kind=kind).first()
                     if not exists: s.add(MediaAsset(language=item,level=level,kind=kind,title=title,path=path,source="generated_local_offline",offline_ready=Path(path).exists()))
                     else: exists.path=path; exists.offline_ready=Path(path).exists()
+        for item in LICENSED_MEDIA:
+            local=Path(media_root)/"licensed"/item["filename"]
+            exists=s.query(MediaAsset).filter_by(language=item["language"],level=item["level"],kind=item["kind"],title=item["title"]).first()
+            if not exists:
+                s.add(MediaAsset(language=item["language"],level=item["level"],kind=item["kind"],title=item["title"],path=str(local),source=item["source_page"],offline_ready=local.exists()))
+            else:
+                exists.path=str(local); exists.source=item["source_page"]; exists.offline_ready=local.exists()
         for code,title,description in [
             ("first_lesson","أول درس","أكمل أول درس."),("five_words","خمس كلمات","راجع خمس مفردات."),("five_lessons","خمسة دروس","أكمل خمسة دروس."),("first_test","أول اختبار","أكمل أول اختبار."),("story_reader","قارئ القصص","اقرأ قصة."),("ten_lessons","عشرة دروس","أكمل عشرة دروس."),("master_level","إتقان مستوى","أتقن دروس مستوى كامل."),("daily_streak","مواظب","أكمل خطة يومية."),("skill_balanced","متوازن","حقق تقدماً في المهارات الست."),("adventure_starter","بداية المغامرة","أكمل أول مهمة في عالم المغامرة."),("media_ready","مستعد للوسائط","شغّل مادة صوتية ومرئية وصورة محلية.")
         ]:
