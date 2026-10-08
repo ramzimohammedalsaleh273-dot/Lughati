@@ -5,18 +5,18 @@ class AppDatabase {
   final Database db;
   AppDatabase._(this.db);
 
-  static Future<AppDatabase> open({String? path}) async {
+  static Future<AppDatabase> open({String? path, bool seedFull = true}) async {
     final dbPath = path ?? p.join(await getDatabasesPath(), 'lughati.db');
     final database = await openDatabase(
       dbPath,
       version: 2,
-      onCreate: _create,
+      onCreate: (db, version) => _create(db, version, seedFull: seedFull),
       onUpgrade: _upgrade,
     );
     return AppDatabase._(database);
   }
 
-  static Future<void> _create(Database db, int version) async {
+  static Future<void> _create(Database db, int version, {bool seedFull = true}) async {
     await db.execute('CREATE TABLE children(id INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT NOT NULL,age INTEGER NOT NULL,language TEXT NOT NULL DEFAULT "ar")');
     await db.execute('CREATE TABLE lessons(id INTEGER PRIMARY KEY AUTOINCREMENT,language TEXT NOT NULL,age_group TEXT NOT NULL,level INTEGER NOT NULL,title TEXT NOT NULL,skill TEXT NOT NULL,objective TEXT NOT NULL,body TEXT NOT NULL)');
     await db.execute('CREATE TABLE lesson_steps(id INTEGER PRIMARY KEY AUTOINCREMENT,lesson_id INTEGER NOT NULL,step_no INTEGER NOT NULL,kind TEXT NOT NULL,prompt TEXT NOT NULL,answer TEXT,options TEXT)');
@@ -30,7 +30,14 @@ class AppDatabase {
     await db.execute('CREATE TABLE daily_tasks(id INTEGER PRIMARY KEY AUTOINCREMENT,child_id INTEGER NOT NULL,title TEXT NOT NULL,kind TEXT NOT NULL,done INTEGER NOT NULL DEFAULT 0,minutes INTEGER NOT NULL,day TEXT NOT NULL)');
     await db.execute('CREATE TABLE media(id INTEGER PRIMARY KEY AUTOINCREMENT,language TEXT NOT NULL,type TEXT NOT NULL,title TEXT NOT NULL,path TEXT,source TEXT,offline INTEGER NOT NULL DEFAULT 0)');
     await db.execute('CREATE TABLE settings(key TEXT PRIMARY KEY,value TEXT NOT NULL)');
-    await _seed(db);
+    if (seedFull) {
+      await _seed(db);
+    } else {
+      await db.insert('children', {'name':'اختبار','age':6,'language':'ar'});
+      await db.insert('settings', {'key':'selected_age','value':'6-7'});
+      await db.insert('settings', {'key':'selected_language','value':'ar'});
+      await db.insert('settings', {'key':'offline_first','value':'true'});
+    }
   }
 
   static Future<void> _upgrade(Database db, int oldVersion, int newVersion) async {
