@@ -16,11 +16,20 @@ LEVEL_TITLES = {
 }
 
 SKILL_TITLES = {
-    "listening": "الاستماع", "speaking": "التحدث", "reading": "القراءة",
-    "writing": "الكتابة", "vocabulary": "المفردات", "grammar": "القواعد",
-    "استماع": "الاستماع", "تحدث": "التحدث", "قراءة": "القراءة",
-    "كتابة": "الكتابة", "مفردات": "المفردات", "تقويم": "التقويم",
+    "ar": {
+        "listening": "الاستماع", "speaking": "التحدث", "reading": "القراءة",
+        "writing": "الكتابة", "vocabulary": "المفردات", "grammar": "القواعد",
+        "استماع": "الاستماع", "تحدث": "التحدث", "قراءة": "القراءة",
+        "كتابة": "الكتابة", "مفردات": "المفردات", "تقويم": "التقويم",
+    },
+    "en": {
+        "listening": "Listening", "speaking": "Speaking", "reading": "Reading",
+        "writing": "Writing", "vocabulary": "Vocabulary", "grammar": "Grammar",
+    },
 }
+
+def stage_title(language, skill):
+    return SKILL_TITLES.get(language, {}).get(skill, skill)
 
 class AppBackend(QObject):
     changed = Signal()
@@ -104,7 +113,7 @@ class AppBackend(QObject):
                     "level": row.level,
                     "stage": stage,
                     "title": row.title,
-                    "stageTitle": SKILL_TITLES.get(row.skill, row.skill),
+                    "stageTitle": stage_title(row.language, row.skill),
                     "skill": row.skill,
                     "body": row.body,
                     "done": self._lesson_done(s, row.id),
@@ -134,7 +143,7 @@ class AppBackend(QObject):
                 "language": row.language,
                 "level": row.level,
                 "title": row.title,
-                "stageTitle": SKILL_TITLES.get(row.skill, row.skill),
+                "stageTitle": stage_title(row.language, row.skill),
                 "skill": row.skill,
                 "body": row.body,
                 "audioUrl": audio_url,
