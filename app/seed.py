@@ -16,7 +16,8 @@ def _lesson(s, data):
     return row
 
 def _word(s, data):
-    if not s.query(Word).filter_by(language=data["language"],text=data["text"]).first():
+    level = data.get("level", 0)
+    if not s.query(Word).filter_by(language=data["language"], text=data["text"], level=level).first():
         s.add(Word(**data))
 
 def _story(s, data):
