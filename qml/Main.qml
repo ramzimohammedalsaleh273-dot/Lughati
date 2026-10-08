@@ -285,7 +285,7 @@ ApplicationWindow {
                                 model: root.lessonRows
                                 delegate: Rectangle {
                                     Layout.fillWidth: true
-                                    Layout.preferredHeight: 105
+                                    Layout.preferredHeight: 128
                                     radius: 20
                                     color: "white"
                                     border.color: modelData.done ? "#9BD5B2" : "#E1E8F0"
@@ -317,8 +317,14 @@ ApplicationWindow {
                                             }
                                             Text {
                                                 text: modelData.stageDescription
-                                                font.pixelSize: 15
-                                                color: "#65758A"
+                                                font.pixelSize: 14
+                                                color: "#53657A"
+                                            }
+                                            Text {
+                                                text: "مثال: " + modelData.example
+                                                font.pixelSize: 13
+                                                color: "#718096"
+                                                elide: Text.ElideRight
                                             }
                                         }
                                         Text {
@@ -371,28 +377,83 @@ ApplicationWindow {
                                     anchors.margins: 24
                                     spacing: 14
                                     Text {
-                                        text: root.selectedLesson.goal || root.selectedLesson.stageDescription || ""
-                                        font.pixelSize: 20
+                                        text: "هدف المستوى"
+                                        font.pixelSize: 16
                                         font.bold: true
                                         color: "#3367A8"
                                     }
                                     Text {
                                         Layout.fillWidth: true
-                                        text: root.selectedLesson.body || ""
+                                        text: root.selectedLesson.goal || ""
                                         wrapMode: Text.WordWrap
                                         font.pixelSize: 18
                                         color: "#40536A"
                                     }
-                                    Button {
-                                        text: "🎧 استمع إلى التدريب الصوتي"
-                                        enabled: (root.selectedLesson.audioUrl || "").length > 0
-                                        onClicked: Qt.openUrlExternally(root.selectedLesson.audioUrl)
+                                    Text {
+                                        text: "ماذا ستتعلم في هذه المرحلة؟"
+                                        font.pixelSize: 16
+                                        font.bold: true
+                                        color: "#3367A8"
                                     }
                                     Text {
-                                        visible: (root.selectedLesson.audioUrl || "").length === 0
-                                        text: "لا يوجد ملف صوتي لهذا المستوى بعد."
-                                        font.pixelSize: 14
-                                        color: "#7A8797"
+                                        Layout.fillWidth: true
+                                        text: root.selectedLesson.target || ""
+                                        wrapMode: Text.WordWrap
+                                        font.pixelSize: 20
+                                        font.bold: true
+                                        color: "#27364B"
+                                    }
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: root.selectedLesson.instruction || ""
+                                        wrapMode: Text.WordWrap
+                                        font.pixelSize: 16
+                                        color: "#40536A"
+                                    }
+                                    Text {
+                                        text: "مثال محلول"
+                                        font.pixelSize: 16
+                                        font.bold: true
+                                        color: "#3367A8"
+                                    }
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: root.selectedLesson.example || ""
+                                        wrapMode: Text.WordWrap
+                                        font.pixelSize: 21
+                                        font.bold: true
+                                        color: "#27364B"
+                                    }
+                                    Text {
+                                        text: "تدرب بنفسك"
+                                        font.pixelSize: 16
+                                        font.bold: true
+                                        color: "#3367A8"
+                                    }
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: root.selectedLesson.practice || ""
+                                        wrapMode: Text.WordWrap
+                                        font.pixelSize: 16
+                                        color: "#40536A"
+                                    }
+                                    Text {
+                                        text: "تحقق من فهمك"
+                                        font.pixelSize: 16
+                                        font.bold: true
+                                        color: "#3367A8"
+                                    }
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: root.selectedLesson.check || ""
+                                        wrapMode: Text.WordWrap
+                                        font.pixelSize: 16
+                                        color: "#40536A"
+                                    }
+                                    Button {
+                                        text: "🔊 استمع إلى المثال"
+                                        enabled: (root.selectedLesson.audioText || "").length > 0
+                                        onClicked: appBackend.speakText(root.selectedLesson.audioText, root.selectedLanguage)
                                     }
                                 }
                             }
