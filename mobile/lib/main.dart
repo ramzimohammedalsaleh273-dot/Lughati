@@ -21,7 +21,7 @@ class LughatiApp extends StatelessWidget {
       title:'لغتي',
       theme:ThemeData(useMaterial3:true,colorSchemeSeed:const Color(0xFF6750A4)),
       home: preview
-          ? const Directionality(textDirection:TextDirection.rtl,child:Scaffold(
+          ? Directionality(textDirection:TextDirection.rtl,child:Scaffold(
               appBar:AppBar(title:Text('لغتي')),
               body:Center(child:Text('خطة اليوم',style:TextStyle(fontSize:24,fontWeight:FontWeight.bold))),
             ))
