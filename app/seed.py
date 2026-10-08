@@ -71,7 +71,7 @@ def seed_content():
                     if not exists: s.add(MediaAsset(language=item,level=level,kind=kind,title=title,path=path,source="generated_local_offline",offline_ready=Path(path).exists()))
                     else: exists.path=path; exists.offline_ready=Path(path).exists()
         for item in LICENSED_MEDIA:
-            local=Path(media_root)/"licensed"/item["filename"]
+            local=Path(media_root["video"]).parent/"licensed"/item["filename"]
             exists=s.query(MediaAsset).filter_by(language=item["language"],level=item["level"],kind=item["kind"],title=item["title"]).first()
             if not exists:
                 s.add(MediaAsset(language=item["language"],level=item["level"],kind=item["kind"],title=item["title"],path=str(local),source=item["source_page"],offline_ready=local.exists()))
