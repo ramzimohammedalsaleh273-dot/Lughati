@@ -1,0 +1,5 @@
+import 'package:flutter/material.dart';import '../data/app_database.dart';
+class ParentScreen extends StatefulWidget{final AppDatabase db;const ParentScreen({super.key,required this.db});@override State<ParentScreen> createState()=>_ParentState();}
+class _ParentState extends State<ParentScreen>{int done=0;@override void initState(){super.initState();load();}Future<void>load()async{final c=await widget.db.child();final n=await widget.db.completedCount(c['id'] as int);if(mounted)setState(()=>done=n);}
+@override Widget build(BuildContext c)=>Directionality(textDirection:TextDirection.rtl,child:ListView(padding:const EdgeInsets.all(20),children:[Text('👨‍👩‍👧 لوحة ولي الأمر',style:Theme.of(c).textTheme.headlineSmall),const SizedBox(height:20),Card(child:ListTile(title:const Text('الدروس المكتملة'),trailing:Text(done.toString()))),const Card(child:ListTile(title:Text('المهارات الست'),subtitle:Text('الاستماع • التحدث • القراءة • الكتابة • المفردات • النحو'))),const Card(child:ListTile(title:Text('الخصوصية'),subtitle:Text('بيانات التعلم تحفظ محلياً افتراضياً.')))]));}
+}
