@@ -209,7 +209,7 @@ class AppDatabase {
   Future<int> completedCount(int childId) async=>((await db.rawQuery('SELECT COUNT(*) c FROM progress WHERE child_id=?',[childId])).first['c'] as int?)??0;
   Future<int> masteredCount(int childId) async=>((await db.rawQuery('SELECT COUNT(*) c FROM progress WHERE child_id=? AND mastered=1',[childId])).first['c'] as int?)??0;
   Future<double> averageScore(int childId) async=>(((await db.rawQuery('SELECT AVG(score) a FROM progress WHERE child_id=?',[childId])).first['a'] as num?)??0).toDouble();
-  Future<List<Map<String,dynamic>>> dailyTasks(int childId) async{await _seedTasks(childId);final day=DateTime.now().toIso8601String().substring(0,10);return db.query('daily_tasks',where:'child_id=? AND day=?',whereArgs:[childId,day],orderBy:'id');}
+  Future<List<Map<String,dynamic>>> dailyTasks(int childId) async{await _seedTasks(db, childId);final day=DateTime.now().toIso8601String().substring(0,10);return db.query('daily_tasks',where:'child_id=? AND day=?',whereArgs:[childId,day],orderBy:'id');}
   Future<void> toggleTask(int id,int done)=>db.update('daily_tasks',{'done':done},where:'id=?',whereArgs:[id]);
   Future<List<Map<String,dynamic>>> achievements(int childId)=>db.rawQuery('SELECT a.*,CASE WHEN ca.child_id IS NULL THEN 0 ELSE 1 END earned FROM achievements a LEFT JOIN child_achievements ca ON a.id=ca.achievement_id AND ca.child_id=? ORDER BY earned DESC,a.id',[childId]);
   Future<List<Map<String,dynamic>>> media(String lang)=>db.query('media',where:'language=?',whereArgs:[lang],orderBy:'type,id');
