@@ -23,8 +23,8 @@ SKILL_TITLES = {
         "كتابة": "الكتابة", "مفردات": "المفردات", "تقويم": "التقويم",
     },
     "en": {
-        "listening": "Listening", "speaking": "Speaking", "reading": "Reading",
-        "writing": "Writing", "vocabulary": "Vocabulary", "grammar": "Grammar",
+        "listening": "الاستماع", "speaking": "التحدث", "reading": "القراءة",
+        "writing": "الكتابة", "vocabulary": "المفردات", "grammar": "التدريب والتطبيق",
     },
 }
 
