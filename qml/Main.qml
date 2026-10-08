@@ -106,8 +106,6 @@ ApplicationWindow {
                             width: Math.min(parent.width - 48, 1000)
                             anchors.horizontalCenter: parent.horizontalCenter
                             spacing: 22
-                            topPadding: 34
-                            bottomPadding: 34
 
                             Text {
                                 Layout.fillWidth: true
@@ -164,10 +162,10 @@ ApplicationWindow {
                                         anchors.centerIn: parent
                                         spacing: 12
                                         Text { text: "🇬🇧"; font.pixelSize: 52; Layout.alignment: Qt.AlignHCenter }
-                                        Text { text: "English"; font.pixelSize: 25; font.bold: true; color: "#27364B"; Layout.alignment: Qt.AlignHCenter }
-                                        Text { text: "Letters, sounds, words, reading and writing"; font.pixelSize: 16; color: "#65758A"; Layout.alignment: Qt.AlignHCenter }
+                                        Text { text: "اللغة الإنجليزية"; font.pixelSize: 25; font.bold: true; color: "#27364B"; Layout.alignment: Qt.AlignHCenter }
+                                        Text { text: "حروف وأصوات وكلمات وقراءة وكتابة"; font.pixelSize: 16; color: "#65758A"; Layout.alignment: Qt.AlignHCenter }
                                         Button {
-                                            text: "Start English"
+                                            text: "ابدأ الإنجليزية"
                                             Layout.alignment: Qt.AlignHCenter
                                             onClicked: root.chooseLanguage("en")
                                         }
@@ -191,11 +189,9 @@ ApplicationWindow {
                             width: Math.min(parent.width - 48, 1050)
                             anchors.horizontalCenter: parent.horizontalCenter
                             spacing: 16
-                            topPadding: 28
-                            bottomPadding: 32
 
                             Text {
-                                text: root.selectedLanguage === "ar" ? "مستويات اللغة العربية" : "English levels"
+                                text: root.selectedLanguage === "ar" ? "مستويات اللغة العربية" : "مستويات اللغة الإنجليزية"
                                 font.pixelSize: 30
                                 font.bold: true
                                 color: "#24364B"
@@ -241,7 +237,7 @@ ApplicationWindow {
                                                 color: "#27364B"
                                             }
                                             Text {
-                                                text: modelData.lessonCount + " مراحل تعليمية"
+                                                text: "١٣ مستوى متدرج • " + modelData.lessonCount + " مراحل في هذا المستوى"
                                                 font.pixelSize: 15
                                                 color: "#65758A"
                                             }
@@ -265,20 +261,16 @@ ApplicationWindow {
                             width: Math.min(parent.width - 48, 1050)
                             anchors.horizontalCenter: parent.horizontalCenter
                             spacing: 15
-                            topPadding: 28
-                            bottomPadding: 32
 
                             Text {
-                                text: (root.selectedLanguage === "ar" ? "مراحل " : "Stages: ")
+                                text: "مراحل المستوى " + (root.selectedLevel + 1) + ": "
                                       + (root.levelRows[root.selectedLevel] ? root.levelRows[root.selectedLevel].title : "")
                                 font.pixelSize: 28
                                 font.bold: true
                                 color: "#24364B"
                             }
                             Text {
-                                text: root.selectedLanguage === "ar"
-                                      ? "ابدأ بالمرحلة الأولى، ثم أكمل المراحل بالترتيب."
-                                      : "Start with stage one and work through the stages in order."
+                                text: root.levelRows[root.selectedLevel] ? root.levelRows[root.selectedLevel].goal : "اتبع المراحل بالترتيب، من الاستماع إلى التطبيق."
                                 font.pixelSize: 17
                                 color: "#65758A"
                             }
@@ -318,7 +310,7 @@ ApplicationWindow {
                                                 color: "#27364B"
                                             }
                                             Text {
-                                                text: modelData.title
+                                                text: modelData.stageDescription
                                                 font.pixelSize: 15
                                                 color: "#65758A"
                                             }
@@ -354,12 +346,10 @@ ApplicationWindow {
                             width: Math.min(parent.width - 48, 1000)
                             anchors.horizontalCenter: parent.horizontalCenter
                             spacing: 18
-                            topPadding: 28
-                            bottomPadding: 36
 
                             Text {
                                 Layout.fillWidth: true
-                                text: root.selectedLesson.title || "الدرس"
+                                text: "المرحلة التعليمية: " + (root.selectedLesson.stageTitle || "الدرس")
                                 wrapMode: Text.WordWrap
                                 font.pixelSize: 29
                                 font.bold: true
@@ -375,7 +365,7 @@ ApplicationWindow {
                                     anchors.margins: 24
                                     spacing: 14
                                     Text {
-                                        text: root.selectedLesson.stageTitle || ""
+                                        text: root.selectedLesson.goal || root.selectedLesson.stageDescription || ""
                                         font.pixelSize: 20
                                         font.bold: true
                                         color: "#3367A8"
