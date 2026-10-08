@@ -31,4 +31,6 @@ jobs:
       - working-directory: mobile
         run: flutter create --platforms android .
       - working-directory: mobile
+        run: sed -i -e 's/compileSdk = flutter.compileSdkVersion/compileSdk = 36/' -e 's/minSdk = flutter.minSdkVersion/minSdk = 24/' android/app/build.gradle
+      - working-directory: mobile
         run: flutter build apk --debug
