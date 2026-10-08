@@ -9,7 +9,7 @@ void main() {
   databaseFactory = databaseFactoryFfi;
 
   testWidgets('واجهة لغتي تفتح', (tester) async {
-    final db = await AppDatabase.open(path: inMemoryDatabasePath);
+    final db = await AppDatabase.open(path: inMemoryDatabasePath, seedFull: false);
     await tester.pumpWidget(LughatiApp(db: db));
     await tester.pumpAndSettle(const Duration(seconds: 2));
     expect(find.text('لغتي'), findsOneWidget);
