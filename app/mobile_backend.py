@@ -146,8 +146,16 @@ class AppBackend(QObject):
     def lessons(self, level, language):
         result = []
         with SessionLocal() as s:
-            rows = (s.query(Lesson).filter_by(level=level, language=language)
-                    .order_by(Lesson.id).all())
+            rows = (s.query(Lesson).filter_by(level=level, language=language).all())
+            stage_order = {
+                "listening": 1, "استماع": 1,
+                "vocabulary": 2, "مفردات": 2,
+                "speaking": 3, "تحدث": 3,
+                "reading": 4, "قراءة": 4,
+                "writing": 5, "كتابة": 5,
+                "grammar": 6, "تقويم": 6,
+            }
+            rows.sort(key=lambda item: (stage_order.get(item.skill, 99), item.id))
             for stage, row in enumerate(rows, 1):
                 result.append({
                     "id": row.id,
