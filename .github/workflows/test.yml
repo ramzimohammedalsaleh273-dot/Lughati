@@ -36,3 +36,9 @@ jobs:
         run: sed -i -e 's/compileSdk = flutter.compileSdkVersion/compileSdk = 36/' -e 's/minSdk = flutter.minSdkVersion/minSdk = 24/' android/app/build.gradle
       - working-directory: mobile
         run: flutter build apk --debug
+      - name: Upload Android APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Lughati-Android-APK
+          path: mobile/build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
