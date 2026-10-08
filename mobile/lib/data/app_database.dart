@@ -122,7 +122,7 @@ class AppDatabase {
     if (((await db.rawQuery('SELECT COUNT(*) c FROM stories')).first['c'] as int?) == 0) await _seedStories(db);
     if (((await db.rawQuery('SELECT COUNT(*) c FROM achievements')).first['c'] as int?) == 0) await _seedAchievements(db);
     final childRows=await db.query('children',limit:1);
-    if(childRows.isNotEmpty) await _seedTasks(db,childRows.first['id'] as int);
+    if(childRows.isNotEmpty) await _seedTasks(db, childRows.first['id'] as int);
     await _seedMedia(db);
   }
 
