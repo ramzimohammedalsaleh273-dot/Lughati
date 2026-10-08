@@ -158,8 +158,10 @@ class AppBackend(QObject):
             }
             rows.sort(key=lambda item: (stage_order.get(item.skill, 99), item.id))
             plan = get_curriculum(language, level)
+            previous_done = True
             for stage_number, row in enumerate(rows, 1):
                 detail = curriculum_stage(language, level, stage_number - 1)
+                done = self._lesson_done(s, row.id)
                 result.append({
                     "id": row.id,
                     "language": row.language,
@@ -176,8 +178,10 @@ class AppBackend(QObject):
                     "review": detail["review"],
                     "goal": plan["goal"],
                     "skill": row.skill,
-                    "done": self._lesson_done(s, row.id),
+                    "done": done,
+                    "locked": not previous_done,
                 })
+                previous_done = done
         return result
 
     def _lesson_done(self, s, lesson_id):
